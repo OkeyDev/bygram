@@ -97,7 +97,8 @@ class Router:
             await c(update, data)
 
         for i in self.routers:
-            await i._handle_update(update, data)
+            if await i._handle_update(update, data):
+                return True
 
         return False
 

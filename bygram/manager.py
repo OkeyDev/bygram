@@ -9,10 +9,9 @@ from bygram.core.types import T
 from bygram.core.wrapper import load_library
 from bygram.executor import Executor
 from bygram.routing.dispatcher import Dispatcher
-from bygram.routing.middlewares import FindClientMiddleware
+from bygram.routing.middlewares import ClientManagerMiddleware
 from bygram.strategy import EventsLoop
 from bygram.types.base import Function
-from bygram.types.raw import UpdateAuthorizationState
 
 _instance = None
 
@@ -87,10 +86,7 @@ class LibraryManager:
 
         self._dispatcher = dp
         self._event_loop.attach_dispatcher(self._dispatcher)
-        self._dispatcher.add_middleware(FindClientMiddleware(self._client_manager))
-        self._dispatcher.register(UpdateAuthorizationState)(
-            self._client_manager.handle_authorization_state_update
-        )
+        self._dispatcher.add_middleware(ClientManagerMiddleware(self._client_manager))
 
     def init(self):
         if self._state == LibraryState.initalized:
