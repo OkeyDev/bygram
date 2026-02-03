@@ -62,6 +62,8 @@ def deserialize_object(obj: bytes) -> DeserializedObject:
         extra = d.pop("@extra", None)
 
         type_ = d.pop("@type", None)
+        if "list" in d:
+            d["list_"] = d.pop("list")
         if type_:
             return _find_class_by_type(type_)(**d)
 
