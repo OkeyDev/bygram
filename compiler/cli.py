@@ -11,7 +11,7 @@ TL_URL = "https://raw.githubusercontent.com/tdlib/td/refs/heads/master/td/genera
 
 def get_reader(file_link: str) -> TextIO:
     if file_link.startswith("http"):
-        resp = requests.get(TL_URL)
+        resp = requests.get(file_link)
         resp.raise_for_status()
         return StringIO(resp.text)
     else:

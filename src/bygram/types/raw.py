@@ -342,14 +342,10 @@ class AuthorizationStateWaitPremiumPurchase(AuthorizationState):
     The user must buy Telegram Premium as an in-store purchase to log in. Call checkAuthenticationPremiumPurchase and then setAuthenticationPremiumPurchaseTransaction
 
     :param store_product_id: Identifier of the store product that must be bought
-    :param support_email_address: Email address to use for support if the user has issues with Telegram Premium purchase
-    :param support_email_subject: Subject for the email sent to the support email address
     """
 
     _type: "str" = field(default="authorizationStateWaitPremiumPurchase", init=False, repr=False)
     store_product_id: "str" = ""
-    support_email_address: "str" = ""
-    support_email_subject: "str" = ""
 
 @dataclass
 class AuthorizationStateWaitEmailAddress(AuthorizationState):
@@ -1052,14 +1048,14 @@ class ChecklistTask(ObjectBase):
 
     :param id: Unique identifier of the task
     :param text: Text of the task; may contain only Bold, Italic, Underline, Strikethrough, Spoiler, CustomEmoji, Url, EmailAddress, Mention, Hashtag, Cashtag and PhoneNumber entities
-    :param completed_by: Identifier of the user or chat that completed the task; may be null if the task isn't completed yet
+    :param completed_by_user_id: Identifier of the user that completed the task; 0 if the task isn't completed
     :param completion_date: Point in time (Unix timestamp) when the task was completed; 0 if the task isn't completed
     """
 
     _type: "str" = field(default="checklistTask", init=False, repr=False)
     id: "int" = 0
     text: "FormattedText | None" = None
-    completed_by: "MessageSender | None" = None
+    completed_by_user_id: "int" = 0
     completion_date: "int" = 0
 
 @dataclass
@@ -1166,19 +1162,6 @@ class Audio(ObjectBase):
     album_cover_thumbnail: "Thumbnail | None" = None
     external_album_covers: "list[Thumbnail] | None" = None
     audio: "File | None" = None
-
-@dataclass
-class Audios(ObjectBase):
-    """
-    Contains a list of audio files
-
-    :param total_count: Approximate total number of audio files found
-    :param audios: List of audio files
-    """
-
-    _type: "str" = field(default="audios", init=False, repr=False)
-    total_count: "int" = 0
-    audios: "list[Audio] | None" = None
 
 @dataclass
 class Document(ObjectBase):
@@ -1334,11 +1317,11 @@ class AnimatedEmoji(ObjectBase):
 @dataclass
 class Contact(ObjectBase):
     """
-    Describes a contact of a user
+    Describes a user contact
 
     :param phone_number: Phone number of the user
-    :param first_name: First name of the user; 1-64 characters
-    :param last_name: Last name of the user; 0-64 characters
+    :param first_name: First name of the user; 1-255 characters in length
+    :param last_name: Last name of the user
     :param vcard: Additional data about the user in a form of vCard; 0-2048 bytes in length
     :param user_id: Identifier of the user, if known; 0 otherwise
     """
@@ -1581,87 +1564,6 @@ class ChatPhotoInfo(ObjectBase):
     is_personal: "bool" = False
 
 @dataclass
-class ProfileTab(ObjectBase):
-    """
-    Describes a tab shown in a user or a chat profile
-
-    """
-
-    _type: "str" = field(default="ProfileTab", init=False, repr=False)
-
-@dataclass
-class ProfileTabPosts(ProfileTab):
-    """
-    A tab with stories posted by the user or the channel chat and saved to profile
-
-    """
-
-    _type: "str" = field(default="profileTabPosts", init=False, repr=False)
-
-@dataclass
-class ProfileTabGifts(ProfileTab):
-    """
-    A tab with gifts received by the user or the channel chat
-
-    """
-
-    _type: "str" = field(default="profileTabGifts", init=False, repr=False)
-
-@dataclass
-class ProfileTabMedia(ProfileTab):
-    """
-    A tab with photos and videos posted by the channel
-
-    """
-
-    _type: "str" = field(default="profileTabMedia", init=False, repr=False)
-
-@dataclass
-class ProfileTabFiles(ProfileTab):
-    """
-    A tab with documents posted by the channel
-
-    """
-
-    _type: "str" = field(default="profileTabFiles", init=False, repr=False)
-
-@dataclass
-class ProfileTabLinks(ProfileTab):
-    """
-    A tab with messages posted by the channel and containing links
-
-    """
-
-    _type: "str" = field(default="profileTabLinks", init=False, repr=False)
-
-@dataclass
-class ProfileTabMusic(ProfileTab):
-    """
-    A tab with audio messages posted by the channel
-
-    """
-
-    _type: "str" = field(default="profileTabMusic", init=False, repr=False)
-
-@dataclass
-class ProfileTabVoice(ProfileTab):
-    """
-    A tab with voice notes posted by the channel
-
-    """
-
-    _type: "str" = field(default="profileTabVoice", init=False, repr=False)
-
-@dataclass
-class ProfileTabGifs(ProfileTab):
-    """
-    A tab with animations posted by the channel
-
-    """
-
-    _type: "str" = field(default="profileTabGifs", init=False, repr=False)
-
-@dataclass
 class UserType(ObjectBase):
     """
     Represents the type of user. The following types are possible: regular users, deleted users and bots
@@ -1697,7 +1599,6 @@ class UserTypeBot(UserType):
     :param can_join_groups: True, if the bot can be invited to basic group and supergroup chats
     :param can_read_all_group_messages: True, if the bot can read all messages in basic group or supergroup chats and not just those addressed to the bot. In private and channel chats a bot can always read all messages
     :param has_main_web_app: True, if the bot has the main Web App
-    :param has_topics: True, if the bot has topics
     :param is_inline: True, if the bot supports inline queries
     :param inline_query_placeholder: Placeholder for inline queries (displayed on the application input field)
     :param need_location: True, if the location of the user is expected to be sent with every inline query to this bot
@@ -1711,7 +1612,6 @@ class UserTypeBot(UserType):
     can_join_groups: "bool" = False
     can_read_all_group_messages: "bool" = False
     has_main_web_app: "bool" = False
-    has_topics: "bool" = False
     is_inline: "bool" = False
     inline_query_placeholder: "str" = ""
     need_location: "bool" = False
@@ -2385,39 +2285,6 @@ class ChatAdministratorRights(ObjectBase):
     is_anonymous: "bool" = False
 
 @dataclass
-class GiftResalePrice(ObjectBase):
-    """
-    Describes price of a resold gift
-
-    """
-
-    _type: "str" = field(default="GiftResalePrice", init=False, repr=False)
-
-@dataclass
-class GiftResalePriceStar(GiftResalePrice):
-    """
-    Describes price of a resold gift in Telegram Stars
-
-    :param star_count: The amount of Telegram Stars expected to be paid for the gift. Must be in range
-     getOption("gift_resale_star_count_min")-getOption("gift_resale_star_count_max") for gifts put for resale
-    """
-
-    _type: "str" = field(default="giftResalePriceStar", init=False, repr=False)
-    star_count: "int" = 0
-
-@dataclass
-class GiftResalePriceTon(GiftResalePrice):
-    """
-    Describes price of a resold gift in Toncoins
-
-    :param toncoin_cent_count: The amount of 1/100 of Toncoin expected to be paid for the gift. Must be in range
-     getOption("gift_resale_toncoin_cent_count_min")-getOption("gift_resale_toncoin_cent_count_max")
-    """
-
-    _type: "str" = field(default="giftResalePriceTon", init=False, repr=False)
-    toncoin_cent_count: "int" = 0
-
-@dataclass
 class SuggestedPostPrice(ObjectBase):
     """
     Describes price of a suggested post
@@ -2431,7 +2298,7 @@ class SuggestedPostPriceStar(SuggestedPostPrice):
     """
     Describes price of a suggested post in Telegram Stars
 
-    :param star_count: The amount of Telegram Stars expected to be paid for the post; getOption("suggested_post_star_count_min")-getOption("suggested_post_star_count_max")
+    :param star_count: The amount of Telegram Stars agreed to pay for the post; getOption("suggested_post_star_count_min")-getOption("suggested_post_star_count_max")
     """
 
     _type: "str" = field(default="suggestedPostPriceStar", init=False, repr=False)
@@ -2442,7 +2309,7 @@ class SuggestedPostPriceTon(SuggestedPostPrice):
     """
     Describes price of a suggested post in Toncoins
 
-    :param toncoin_cent_count: The amount of 1/100 of Toncoin expected to be paid for the post; getOption("suggested_post_toncoin_cent_count_min")-getOption("suggested_post_toncoin_cent_count_max")
+    :param toncoin_cent_count: The amount of 1/100 of Toncoin agreed to pay for the post; getOption("suggested_post_toncoin_cent_count_min")-getOption("suggested_post_toncoin_cent_count_max")
     """
 
     _type: "str" = field(default="suggestedPostPriceTon", init=False, repr=False)
@@ -2965,8 +2832,7 @@ class PremiumGiftCodeInfo(ObjectBase):
     :param creation_date: Point in time (Unix timestamp) when the code was created
     :param is_from_giveaway: True, if the gift code was created for a giveaway
     :param giveaway_message_id: Identifier of the corresponding giveaway message in the creator_id chat; can be 0 or an identifier of a deleted message
-    :param month_count: Number of months the Telegram Premium subscription will be active after code activation; 0 if the number of months isn't integer
-    :param day_count: Number of days the Telegram Premium subscription will be active after code activation
+    :param month_count: Number of months the Telegram Premium subscription will be active after code activation
     :param user_id: Identifier of a user for which the code was created; 0 if none
     :param use_date: Point in time (Unix timestamp) when the code was activated; 0 if none
     """
@@ -2977,7 +2843,6 @@ class PremiumGiftCodeInfo(ObjectBase):
     is_from_giveaway: "bool" = False
     giveaway_message_id: "int" = 0
     month_count: "int" = 0
-    day_count: "int" = 0
     user_id: "int" = 0
     use_date: "int" = 0
 
@@ -3070,7 +2935,6 @@ class AcceptedGiftTypes(ObjectBase):
     :param unlimited_gifts: True, if unlimited regular gifts are accepted
     :param limited_gifts: True, if limited regular gifts are accepted
     :param upgraded_gifts: True, if upgraded gifts and regular gifts that can be upgraded for free are accepted
-    :param gifts_from_channels: True, if gifts from channels are accepted subject to other restrictions
     :param premium_subscription: True, if Telegram Premium subscription is accepted
     """
 
@@ -3078,7 +2942,6 @@ class AcceptedGiftTypes(ObjectBase):
     unlimited_gifts: "bool" = False
     limited_gifts: "bool" = False
     upgraded_gifts: "bool" = False
-    gifts_from_channels: "bool" = False
     premium_subscription: "bool" = False
 
 @dataclass
@@ -3093,119 +2956,6 @@ class GiftSettings(ObjectBase):
     _type: "str" = field(default="giftSettings", init=False, repr=False)
     show_gift_button: "bool" = False
     accepted_gift_types: "AcceptedGiftTypes | None" = None
-
-@dataclass
-class GiftAuction(ObjectBase):
-    """
-    Describes an auction on which a gift can be purchased
-
-    :param id: Identifier of the auction
-    :param gifts_per_round: Number of gifts distributed in each round
-    """
-
-    _type: "str" = field(default="giftAuction", init=False, repr=False)
-    id: "str" = ""
-    gifts_per_round: "int" = 0
-
-@dataclass
-class GiftBackground(ObjectBase):
-    """
-    Describes background of a gift
-
-    :param center_color: Center color in RGB format
-    :param edge_color: Edge color in RGB format
-    :param text_color: Text color in RGB format
-    """
-
-    _type: "str" = field(default="giftBackground", init=False, repr=False)
-    center_color: "int" = 0
-    edge_color: "int" = 0
-    text_color: "int" = 0
-
-@dataclass
-class GiftPurchaseLimits(ObjectBase):
-    """
-    Describes the maximum number of times that a specific gift can be purchased
-
-    :param total_count: The maximum number of times the gifts can be purchased
-    :param remaining_count: Number of remaining times the gift can be purchased
-    """
-
-    _type: "str" = field(default="giftPurchaseLimits", init=False, repr=False)
-    total_count: "int" = 0
-    remaining_count: "int" = 0
-
-@dataclass
-class GiftResaleParameters(ObjectBase):
-    """
-    Describes parameters of a unique gift available for resale
-
-    :param star_count: Resale price of the gift in Telegram Stars
-    :param toncoin_cent_count: Resale price of the gift in 1/100 of Toncoin
-    :param toncoin_only: True, if the gift can be bought only using Toncoins
-    """
-
-    _type: "str" = field(default="giftResaleParameters", init=False, repr=False)
-    star_count: "int" = 0
-    toncoin_cent_count: "int" = 0
-    toncoin_only: "bool" = False
-
-@dataclass
-class GiftCollection(ObjectBase):
-    """
-    Describes collection of gifts
-
-    :param id: Unique identifier of the collection
-    :param name: Name of the collection
-    :param icon: Icon of the collection; may be null if none
-    :param gift_count: Total number of gifts in the collection
-    """
-
-    _type: "str" = field(default="giftCollection", init=False, repr=False)
-    id: "int" = 0
-    name: "str" = ""
-    icon: "Sticker | None" = None
-    gift_count: "int" = 0
-
-@dataclass
-class GiftCollections(ObjectBase):
-    """
-    Contains a list of gift collections
-
-    :param collections: List of gift collections
-    """
-
-    _type: "str" = field(default="giftCollections", init=False, repr=False)
-    collections: "list[GiftCollection] | None" = None
-
-@dataclass
-class CanSendGiftResult(ObjectBase):
-    """
-    Describes whether a gift can be sent now by the current user
-
-    """
-
-    _type: "str" = field(default="CanSendGiftResult", init=False, repr=False)
-
-@dataclass
-class CanSendGiftResultOk(CanSendGiftResult):
-    """
-    The gift can be sent now by the current user
-
-    """
-
-    _type: "str" = field(default="canSendGiftResultOk", init=False, repr=False)
-
-@dataclass
-class CanSendGiftResultFail(CanSendGiftResult):
-    """
-    The gift can't be sent now by the current user
-
-    :param reason: Reason to be shown to the user
-    """
-
-    _type: "str" = field(default="canSendGiftResultFail", init=False, repr=False)
-    reason: "FormattedText | None" = None
 
 @dataclass
 class UpgradedGiftOrigin(ObjectBase):
@@ -3241,29 +2991,11 @@ class UpgradedGiftOriginResale(UpgradedGiftOrigin):
     """
     The gift was bought from another user
 
-    :param price: Price paid by the sender for the gift
+    :param star_count: Number of Telegram Stars that were paid by the sender for the gift
     """
 
     _type: "str" = field(default="upgradedGiftOriginResale", init=False, repr=False)
-    price: "GiftResalePrice | None" = None
-
-@dataclass
-class UpgradedGiftOriginBlockchain(UpgradedGiftOrigin):
-    """
-    The gift was assigned from blockchain and isn't owned by the current user. The gift can't be transferred, resold or withdrawn to blockchain
-
-    """
-
-    _type: "str" = field(default="upgradedGiftOriginBlockchain", init=False, repr=False)
-
-@dataclass
-class UpgradedGiftOriginPrepaidUpgrade(UpgradedGiftOrigin):
-    """
-    The sender or receiver of the message has paid for upgraid of the gift, which has been completed
-
-    """
-
-    _type: "str" = field(default="upgradedGiftOriginPrepaidUpgrade", init=False, repr=False)
+    star_count: "int" = 0
 
 @dataclass
 class UpgradedGiftModel(ObjectBase):
@@ -3347,29 +3079,6 @@ class UpgradedGiftOriginalDetails(ObjectBase):
     date: "int" = 0
 
 @dataclass
-class UpgradedGiftColors(ObjectBase):
-    """
-    Contains information about color scheme for user's name, background of empty chat photo, replies to messages and link previews
-
-    :param id: Unique identifier of the upgraded gift colors
-    :param model_custom_emoji_id: Custom emoji identifier of the model of the upgraded gift
-    :param symbol_custom_emoji_id: Custom emoji identifier of the symbol of the upgraded gift
-    :param light_theme_accent_color: Accent color to use in light themes in RGB format
-    :param light_theme_colors: The list of 1-3 colors in RGB format, describing the accent color, as expected to be shown in light themes
-    :param dark_theme_accent_color: Accent color to use in dark themes in RGB format
-    :param dark_theme_colors: The list of 1-3 colors in RGB format, describing the accent color, as expected to be shown in dark themes
-    """
-
-    _type: "str" = field(default="upgradedGiftColors", init=False, repr=False)
-    id: "int" = 0
-    model_custom_emoji_id: "int" = 0
-    symbol_custom_emoji_id: "int" = 0
-    light_theme_accent_color: "int" = 0
-    light_theme_colors: "list[int] | None" = None
-    dark_theme_accent_color: "int" = 0
-    dark_theme_colors: "list[int] | None" = None
-
-@dataclass
 class Gift(ObjectBase):
     """
     Describes a gift that can be sent to another user or channel chat
@@ -3380,14 +3089,9 @@ class Gift(ObjectBase):
     :param star_count: Number of Telegram Stars that must be paid for the gift
     :param default_sell_star_count: Number of Telegram Stars that can be claimed by the receiver instead of the regular gift by default. If the gift was paid with just bought Telegram Stars, then full value can be claimed
     :param upgrade_star_count: Number of Telegram Stars that must be paid to upgrade the gift; 0 if upgrade isn't possible
-    :param has_colors: True, if the gift can be used to customize the user's name, and backgrounds of profile photo, reply header, and link preview
     :param is_for_birthday: True, if the gift is a birthday gift
-    :param is_premium: True, if the gift can be bought only by Telegram Premium subscribers
-    :param auction_info: Information about the auction on which the gift can be purchased; may be null if the gift can be purchased directly
-    :param next_send_date: Point in time (Unix timestamp) when the gift can be sent next time by the current user; can be 0 or a date in the past.
-     If the date is in the future, then call canSendGift to get the reason, why the gift can't be sent now
-    :param user_limits: Number of times the gift can be purchased by the current user; may be null if not limited
-    :param overall_limits: Number of times the gift can be purchased all users; may be null if not limited
+    :param remaining_count: Number of remaining times the gift can be purchased; 0 if not limited or the gift was sold out
+    :param total_count: Number of total times the gift can be purchased; 0 if not limited
     :param first_send_date: Point in time (Unix timestamp) when the gift was send for the first time; for sold out gifts only
     :param last_send_date: Point in time (Unix timestamp) when the gift was send for the last time; for sold out gifts only
     """
@@ -3399,13 +3103,9 @@ class Gift(ObjectBase):
     star_count: "int" = 0
     default_sell_star_count: "int" = 0
     upgrade_star_count: "int" = 0
-    has_colors: "bool" = False
     is_for_birthday: "bool" = False
-    is_premium: "bool" = False
-    auction_info: "GiftAuction | None" = None
-    next_send_date: "int" = 0
-    user_limits: "GiftPurchaseLimits | None" = None
-    overall_limits: "GiftPurchaseLimits | None" = None
+    remaining_count: "int" = 0
+    total_count: "int" = 0
     first_send_date: "int" = 0
     last_send_date: "int" = 0
 
@@ -3415,17 +3115,12 @@ class UpgradedGift(ObjectBase):
     Describes an upgraded gift that can be transferred to another owner or transferred to the TON blockchain as an NFT
 
     :param id: Unique identifier of the gift
-    :param regular_gift_id: Unique identifier of the regular gift from which the gift was upgraded; may be 0 for short period of time for old gifts from database
     :param publisher_chat_id: Identifier of the chat that published the gift; 0 if none
     :param title: The title of the upgraded gift
     :param name: Unique name of the upgraded gift that can be used with internalLinkTypeUpgradedGift or sendResoldGift
     :param number: Unique number of the upgraded gift among gifts upgraded from the same gift
     :param total_upgraded_count: Total number of gifts that were upgraded from the same gift
     :param max_upgraded_count: The maximum number of gifts that can be upgraded from the same gift
-    :param is_premium: True, if the original gift could have been bought only by Telegram Premium subscribers
-    :param is_theme_available: True, if the gift can be used to set a theme in a chat
-    :param used_theme_chat_id: Identifier of the chat for which the gift is used to set a theme; 0 if none or the gift isn't owned by the current user
-    :param host_id: Identifier of the user or the chat to which the upgraded gift was assigned from blockchain; may be null if none or unknown
     :param owner_id: Identifier of the user or the chat that owns the upgraded gift; may be null if none or unknown
     :param owner_address: Address of the gift NFT owner in TON blockchain; may be empty if none. Append the address to getOption("ton_blockchain_explorer_url") to get a link with information about the address
     :param owner_name: Name of the owner for the case when owner identifier and address aren't known
@@ -3434,25 +3129,17 @@ class UpgradedGift(ObjectBase):
     :param symbol: Symbol of the upgraded gift
     :param backdrop: Backdrop of the upgraded gift
     :param original_details: Information about the originally sent gift; may be null if unknown
-    :param colors: Colors that can be set for user's name, background of empty chat photo, replies to messages and link previews; may be null if none
-    :param resale_parameters: Resale parameters of the gift; may be null if resale isn't possible
-    :param value_currency: ISO 4217 currency code of the currency in which value of the gift is represented; may be empty if unavailable
-    :param value_amount: Estimated value of the gift; in the smallest units of the currency; 0 if unavailable
+    :param resale_star_count: Number of Telegram Stars that must be paid to buy the gift and send it to someone else; 0 if resale isn't possible
     """
 
     _type: "str" = field(default="upgradedGift", init=False, repr=False)
     id: "int" = 0
-    regular_gift_id: "int" = 0
     publisher_chat_id: "int" = 0
     title: "str" = ""
     name: "str" = ""
     number: "int" = 0
     total_upgraded_count: "int" = 0
     max_upgraded_count: "int" = 0
-    is_premium: "bool" = False
-    is_theme_available: "bool" = False
-    used_theme_chat_id: "int" = 0
-    host_id: "MessageSender | None" = None
     owner_id: "MessageSender | None" = None
     owner_address: "str" = ""
     owner_name: "str" = ""
@@ -3461,47 +3148,7 @@ class UpgradedGift(ObjectBase):
     symbol: "UpgradedGiftSymbol | None" = None
     backdrop: "UpgradedGiftBackdrop | None" = None
     original_details: "UpgradedGiftOriginalDetails | None" = None
-    colors: "UpgradedGiftColors | None" = None
-    resale_parameters: "GiftResaleParameters | None" = None
-    value_currency: "str" = ""
-    value_amount: "int" = 0
-
-@dataclass
-class UpgradedGiftValueInfo(ObjectBase):
-    """
-    Contains information about value of an upgraded gift
-
-    :param currency: ISO 4217 currency code of the currency in which the prices are represented
-    :param value: Estimated value of the gift; in the smallest units of the currency
-    :param is_value_average: True, if the value is calculated as average value of similar sold gifts. Otherwise, it is based on the sale price of the gift
-    :param initial_sale_date: Point in time (Unix timestamp) when the corresponding regular gift was originally purchased
-    :param initial_sale_star_count: Amount of Telegram Stars that were paid for the gift
-    :param initial_sale_price: Initial price of the gift; in the smallest units of the currency
-    :param last_sale_date: Point in time (Unix timestamp) when the upgraded gift was purchased last time; 0 if never
-    :param last_sale_price: Last purchase price of the gift; in the smallest units of the currency; 0 if the gift has never been resold
-    :param is_last_sale_on_fragment: True, if the last sale was completed on Fragment
-    :param minimum_price: The current minimum price of gifts upgraded from the same gift; in the smallest units of the currency; 0 if there are no such gifts
-    :param average_sale_price: The average sale price in the last month of gifts upgraded from the same gift; in the smallest units of the currency; 0 if there were no such sales
-    :param telegram_listed_gift_count: Number of gifts upgraded from the same gift being resold on Telegram
-    :param fragment_listed_gift_count: Number of gifts upgraded from the same gift being resold on Fragment
-    :param fragment_url: The HTTPS link to the Fragment for the gift; may be empty if there are no such gifts being sold on Fragment
-    """
-
-    _type: "str" = field(default="upgradedGiftValueInfo", init=False, repr=False)
-    currency: "str" = ""
-    value: "int" = 0
-    is_value_average: "bool" = False
-    initial_sale_date: "int" = 0
-    initial_sale_star_count: "int" = 0
-    initial_sale_price: "int" = 0
-    last_sale_date: "int" = 0
-    last_sale_price: "int" = 0
-    is_last_sale_on_fragment: "bool" = False
-    minimum_price: "int" = 0
-    average_sale_price: "int" = 0
-    telegram_listed_gift_count: "int" = 0
-    fragment_listed_gift_count: "int" = 0
-    fragment_url: "str" = ""
+    resale_star_count: "int" = 0
 
 @dataclass
 class UpgradeGiftResult(ObjectBase):
@@ -3513,10 +3160,9 @@ class UpgradeGiftResult(ObjectBase):
     :param is_saved: True, if the gift is displayed on the user's or the channel's profile page
     :param can_be_transferred: True, if the gift can be transferred to another owner
     :param transfer_star_count: Number of Telegram Stars that must be paid to transfer the upgraded gift
-    :param drop_original_details_star_count: Number of Telegram Stars that must be paid to drop original details of the upgraded gift; 0 if not available
-    :param next_transfer_date: Point in time (Unix timestamp) when the gift can be transferred to another owner; can be in the past; 0 if the gift can be transferred immediately or transfer isn't possible
-    :param next_resale_date: Point in time (Unix timestamp) when the gift can be resold to another user; can be in the past; 0 if the gift can't be resold; only for the receiver of the gift
-    :param export_date: Point in time (Unix timestamp) when the gift can be transferred to the TON blockchain as an NFT; can be in the past
+    :param next_transfer_date: Point in time (Unix timestamp) when the gift can be transferred to another owner; 0 if the gift can be transferred immediately or transfer isn't possible
+    :param next_resale_date: Point in time (Unix timestamp) when the gift can be resold to another user; 0 if the gift can't be resold; only for the receiver of the gift
+    :param export_date: Point in time (Unix timestamp) when the gift can be transferred to the TON blockchain as an NFT
     """
 
     _type: "str" = field(default="upgradeGiftResult", init=False, repr=False)
@@ -3525,7 +3171,6 @@ class UpgradeGiftResult(ObjectBase):
     is_saved: "bool" = False
     can_be_transferred: "bool" = False
     transfer_star_count: "int" = 0
-    drop_original_details_star_count: "int" = 0
     next_transfer_date: "int" = 0
     next_resale_date: "int" = 0
     export_date: "int" = 0
@@ -3537,7 +3182,7 @@ class AvailableGift(ObjectBase):
 
     :param gift: The gift
     :param resale_count: Number of gifts that are available for resale
-    :param min_resale_star_count: The minimum price for the gifts available for resale in Telegram Star equivalent; 0 if there are no such gifts
+    :param min_resale_star_count: The minimum price for the gifts available for resale; 0 if there are no such gifts
     :param title: The title of the upgraded gift; empty if the gift isn't available for resale
     """
 
@@ -3557,19 +3202,6 @@ class AvailableGifts(ObjectBase):
 
     _type: "str" = field(default="availableGifts", init=False, repr=False)
     gifts: "list[AvailableGift] | None" = None
-
-@dataclass
-class GiftUpgradePrice(ObjectBase):
-    """
-    Describes a price required to pay to upgrade a gift
-
-    :param date: Point in time (Unix timestamp) when the price will be in effect
-    :param star_count: The amount of Telegram Stars required to pay to upgrade the gift
-    """
-
-    _type: "str" = field(default="giftUpgradePrice", init=False, repr=False)
-    date: "int" = 0
-    star_count: "int" = 0
 
 @dataclass
 class UpgradedGiftAttributeId(ObjectBase):
@@ -3723,35 +3355,6 @@ class GiftsForResale(ObjectBase):
     next_offset: "str" = ""
 
 @dataclass
-class GiftResaleResult(ObjectBase):
-    """
-    Describes result of sending a resold gift
-
-    """
-
-    _type: "str" = field(default="GiftResaleResult", init=False, repr=False)
-
-@dataclass
-class GiftResaleResultOk(GiftResaleResult):
-    """
-    Operation was successfully completed
-
-    """
-
-    _type: "str" = field(default="giftResaleResultOk", init=False, repr=False)
-
-@dataclass
-class GiftResaleResultPriceIncreased(GiftResaleResult):
-    """
-    Operation has failed, because price has increased. If the price has decreased, then the buying will succeed anyway
-
-    :param price: New price for the gift
-    """
-
-    _type: "str" = field(default="giftResaleResultPriceIncreased", init=False, repr=False)
-    price: "GiftResalePrice | None" = None
-
-@dataclass
 class SentGift(ObjectBase):
     """
     Represents content of a gift received by a user or a channel chat
@@ -3798,16 +3401,12 @@ class ReceivedGift(ObjectBase):
     :param was_refunded: True, if the gift was refunded and isn't available anymore
     :param date: Point in time (Unix timestamp) when the gift was sent
     :param gift: The gift
-    :param collection_ids: Identifiers of collections to which the gift is added; only for the receiver of the gift
     :param sell_star_count: Number of Telegram Stars that can be claimed by the receiver instead of the regular gift; 0 if the gift can't be sold by the current user
     :param prepaid_upgrade_star_count: Number of Telegram Stars that were paid by the sender for the ability to upgrade the gift
-    :param is_upgrade_separate: True, if the upgrade was bought after the gift was sent. In this case, prepaid upgrade cost must not be added to the gift cost
     :param transfer_star_count: Number of Telegram Stars that must be paid to transfer the upgraded gift; only for the receiver of the gift
-    :param drop_original_details_star_count: Number of Telegram Stars that must be paid to drop original details of the upgraded gift; 0 if not available; only for the receiver of the gift
-    :param next_transfer_date: Point in time (Unix timestamp) when the gift can be transferred to another owner; can be in the past; 0 if the gift can be transferred immediately or transfer isn't possible; only for the receiver of the gift
-    :param next_resale_date: Point in time (Unix timestamp) when the gift can be resold to another user; can be in the past; 0 if the gift can't be resold; only for the receiver of the gift
-    :param export_date: Point in time (Unix timestamp) when the upgraded gift can be transferred to the TON blockchain as an NFT; can be in the past; 0 if NFT export isn't possible; only for the receiver of the gift
-    :param prepaid_upgrade_hash: If non-empty, then the user can pay for an upgrade of the gift using buyGiftUpgrade
+    :param next_transfer_date: Point in time (Unix timestamp) when the gift can be transferred to another owner; 0 if the gift can be transferred immediately or transfer isn't possible; only for the receiver of the gift
+    :param next_resale_date: Point in time (Unix timestamp) when the gift can be resold to another user; 0 if the gift can't be resold; only for the receiver of the gift
+    :param export_date: Point in time (Unix timestamp) when the upgraded gift can be transferred to the TON blockchain as an NFT; 0 if NFT export isn't possible; only for the receiver of the gift
     """
 
     _type: "str" = field(default="receivedGift", init=False, repr=False)
@@ -3822,16 +3421,12 @@ class ReceivedGift(ObjectBase):
     was_refunded: "bool" = False
     date: "int" = 0
     gift: "SentGift | None" = None
-    collection_ids: "list[int] | None" = None
     sell_star_count: "int" = 0
     prepaid_upgrade_star_count: "int" = 0
-    is_upgrade_separate: "bool" = False
     transfer_star_count: "int" = 0
-    drop_original_details_star_count: "int" = 0
     next_transfer_date: "int" = 0
     next_resale_date: "int" = 0
     export_date: "int" = 0
-    prepaid_upgrade_hash: "str" = ""
 
 @dataclass
 class ReceivedGifts(ObjectBase):
@@ -3858,154 +3453,12 @@ class GiftUpgradePreview(ObjectBase):
     :param models: Examples of possible models that can be chosen for the gift after upgrade
     :param symbols: Examples of possible symbols that can be chosen for the gift after upgrade
     :param backdrops: Examples of possible backdrops that can be chosen for the gift after upgrade
-    :param prices: Examples of price for gift upgrade from the maximum price to the minimum price
-    :param next_prices: Next changes for the price for gift upgrade with more granularity than in prices
     """
 
     _type: "str" = field(default="giftUpgradePreview", init=False, repr=False)
     models: "list[UpgradedGiftModel] | None" = None
     symbols: "list[UpgradedGiftSymbol] | None" = None
     backdrops: "list[UpgradedGiftBackdrop] | None" = None
-    prices: "list[GiftUpgradePrice] | None" = None
-    next_prices: "list[GiftUpgradePrice] | None" = None
-
-@dataclass
-class AuctionBid(ObjectBase):
-    """
-    Describes a bid in an auction
-
-    :param star_count: The number of Telegram Stars that were put in the bid
-    :param bid_date: Point in time (Unix timestamp) when the bid was made
-    :param position: Position of the bid in the list of all bids
-    """
-
-    _type: "str" = field(default="auctionBid", init=False, repr=False)
-    star_count: "int" = 0
-    bid_date: "int" = 0
-    position: "int" = 0
-
-@dataclass
-class UserAuctionBid(ObjectBase):
-    """
-    Describes a bid of the current user in an auction
-
-    :param star_count: The number of Telegram Stars that were put in the bid
-    :param bid_date: Point in time (Unix timestamp) when the bid was made
-    :param next_bid_star_count: The minimum number of Telegram Stars that can be put for the next bid
-    :param owner_id: Identifier of the user or the chat that will receive the auctioned item. If the auction is opened in context of another user or chat, then a warning is supposed to be shown to the current user
-    :param was_returned: True, if the bid was returned to the user, because it was outbid and can't win anymore
-    """
-
-    _type: "str" = field(default="userAuctionBid", init=False, repr=False)
-    star_count: "int" = 0
-    bid_date: "int" = 0
-    next_bid_star_count: "int" = 0
-    owner_id: "MessageSender | None" = None
-    was_returned: "bool" = False
-
-@dataclass
-class AuctionState(ObjectBase):
-    """
-    Describes state of an auction
-
-    """
-
-    _type: "str" = field(default="AuctionState", init=False, repr=False)
-
-@dataclass
-class AuctionStateActive(AuctionState):
-    """
-    Contains information about an ongoing auction
-
-    :param start_date: Point in time (Unix timestamp) when the auction started
-    :param end_date: Point in time (Unix timestamp) when the auction will be ended
-    :param min_bid: The minimum possible bid in the auction in Telegram Stars
-    :param bid_levels: A sparse list of bids that were made in the auction
-    :param top_bidder_user_ids: User identifiers of at most 3 users with the biggest bids
-    :param current_round_end_date: Point in time (Unix timestamp) when the current round will end
-    :param current_round_number: 1-based number of the current round
-    :param total_round_count: The total number of rounds
-    :param left_item_count: The number of items that have to be distributed on the auction
-    :param acquired_item_count: The number of items that were purchased by the current user on the auction
-    :param user_bid: Bid of the current user in the auction; may be null if none
-    """
-
-    _type: "str" = field(default="auctionStateActive", init=False, repr=False)
-    start_date: "int" = 0
-    end_date: "int" = 0
-    min_bid: "int" = 0
-    bid_levels: "list[AuctionBid] | None" = None
-    top_bidder_user_ids: "list[int] | None" = None
-    current_round_end_date: "int" = 0
-    current_round_number: "int" = 0
-    total_round_count: "int" = 0
-    left_item_count: "int" = 0
-    acquired_item_count: "int" = 0
-    user_bid: "UserAuctionBid | None" = None
-
-@dataclass
-class AuctionStateFinished(AuctionState):
-    """
-    Contains information about a finished auction
-
-    :param start_date: Point in time (Unix timestamp) when the auction started
-    :param end_date: Point in time (Unix timestamp) when the auction will be ended
-    :param average_price: Average price of bought items in Telegram Stars
-    :param acquired_item_count: The number of items that were purchased by the current user on the auction
-    """
-
-    _type: "str" = field(default="auctionStateFinished", init=False, repr=False)
-    start_date: "int" = 0
-    end_date: "int" = 0
-    average_price: "int" = 0
-    acquired_item_count: "int" = 0
-
-@dataclass
-class GiftAuctionState(ObjectBase):
-    """
-    Represent auction state of a gift
-
-    :param gift: The gift
-    :param state: Auction state of the gift
-    """
-
-    _type: "str" = field(default="giftAuctionState", init=False, repr=False)
-    gift: "Gift | None" = None
-    state: "AuctionState | None" = None
-
-@dataclass
-class GiftAuctionAcquiredGift(ObjectBase):
-    """
-    Represents a gift that was acquired by the current user on an auction
-
-    :param receiver_id: Receiver of the gift
-    :param date: Point in time (Unix timestamp) when the gift was acquired
-    :param star_count: The number of Telegram Stars that were paid for the gift
-    :param auction_round_number: Identifier of the auction round in which the gift was acquired
-    :param auction_round_position: Position of the user in the round among all auction participants
-    :param text: Message added to the gift
-    :param is_private: True, if the sender and gift text are shown only to the gift receiver; otherwise, everyone will be able to see them
-    """
-
-    _type: "str" = field(default="giftAuctionAcquiredGift", init=False, repr=False)
-    receiver_id: "MessageSender | None" = None
-    date: "int" = 0
-    star_count: "int" = 0
-    auction_round_number: "int" = 0
-    auction_round_position: "int" = 0
-    text: "FormattedText | None" = None
-    is_private: "bool" = False
-
-@dataclass
-class GiftAuctionAcquiredGifts(ObjectBase):
-    """
-    Represents a list of gifts that were acquired by the current user on an auction
-
-    :param gifts: The list of acquired gifts
-    """
-
-    _type: "str" = field(default="giftAuctionAcquiredGifts", init=False, repr=False)
-    gifts: "list[GiftAuctionAcquiredGift] | None" = None
 
 @dataclass
 class TransactionDirection(ObjectBase):
@@ -4046,7 +3499,7 @@ class StarTransactionType(ObjectBase):
 @dataclass
 class StarTransactionTypePremiumBotDeposit(StarTransactionType):
     """
-    The transaction is a deposit of Telegram Stars from the Premium bot; relevant for regular users only
+    The transaction is a deposit of Telegram Stars from the Premium bot; for regular users only
 
     """
 
@@ -4055,7 +3508,7 @@ class StarTransactionTypePremiumBotDeposit(StarTransactionType):
 @dataclass
 class StarTransactionTypeAppStoreDeposit(StarTransactionType):
     """
-    The transaction is a deposit of Telegram Stars from App Store; relevant for regular users only
+    The transaction is a deposit of Telegram Stars from App Store; for regular users only
 
     """
 
@@ -4064,7 +3517,7 @@ class StarTransactionTypeAppStoreDeposit(StarTransactionType):
 @dataclass
 class StarTransactionTypeGooglePlayDeposit(StarTransactionType):
     """
-    The transaction is a deposit of Telegram Stars from Google Play; relevant for regular users only
+    The transaction is a deposit of Telegram Stars from Google Play; for regular users only
 
     """
 
@@ -4073,7 +3526,7 @@ class StarTransactionTypeGooglePlayDeposit(StarTransactionType):
 @dataclass
 class StarTransactionTypeFragmentDeposit(StarTransactionType):
     """
-    The transaction is a deposit of Telegram Stars from Fragment; relevant for regular users and bots only
+    The transaction is a deposit of Telegram Stars from Fragment; for regular users and bots only
 
     """
 
@@ -4082,7 +3535,7 @@ class StarTransactionTypeFragmentDeposit(StarTransactionType):
 @dataclass
 class StarTransactionTypeUserDeposit(StarTransactionType):
     """
-    The transaction is a deposit of Telegram Stars by another user; relevant for regular users only
+    The transaction is a deposit of Telegram Stars by another user; for regular users only
 
     :param user_id: Identifier of the user that gifted Telegram Stars; 0 if the user was anonymous
     :param sticker: The sticker to be shown in the transaction information; may be null if unknown
@@ -4095,7 +3548,7 @@ class StarTransactionTypeUserDeposit(StarTransactionType):
 @dataclass
 class StarTransactionTypeGiveawayDeposit(StarTransactionType):
     """
-    The transaction is a deposit of Telegram Stars from a giveaway; relevant for regular users only
+    The transaction is a deposit of Telegram Stars from a giveaway; for regular users only
 
     :param chat_id: Identifier of a supergroup or a channel chat that created the giveaway
     :param giveaway_message_id: Identifier of the message with the giveaway; can be 0 or an identifier of a deleted message
@@ -4108,7 +3561,7 @@ class StarTransactionTypeGiveawayDeposit(StarTransactionType):
 @dataclass
 class StarTransactionTypeFragmentWithdrawal(StarTransactionType):
     """
-    The transaction is a withdrawal of earned Telegram Stars to Fragment; relevant for regular users, bots, supergroup and channel chats only
+    The transaction is a withdrawal of earned Telegram Stars to Fragment; for regular users, bots, supergroup and channel chats only
 
     :param withdrawal_state: State of the withdrawal; may be null for refunds from Fragment
     """
@@ -4119,7 +3572,7 @@ class StarTransactionTypeFragmentWithdrawal(StarTransactionType):
 @dataclass
 class StarTransactionTypeTelegramAdsWithdrawal(StarTransactionType):
     """
-    The transaction is a withdrawal of earned Telegram Stars to Telegram Ad platform; relevant for bots and channel chats only
+    The transaction is a withdrawal of earned Telegram Stars to Telegram Ad platform; for bots and channel chats only
 
     """
 
@@ -4128,7 +3581,7 @@ class StarTransactionTypeTelegramAdsWithdrawal(StarTransactionType):
 @dataclass
 class StarTransactionTypeTelegramApiUsage(StarTransactionType):
     """
-    The transaction is a payment for Telegram API usage; relevant for bots only
+    The transaction is a payment for Telegram API usage; for bots only
 
     :param request_count: The number of billed requests
     """
@@ -4139,7 +3592,7 @@ class StarTransactionTypeTelegramApiUsage(StarTransactionType):
 @dataclass
 class StarTransactionTypeBotPaidMediaPurchase(StarTransactionType):
     """
-    The transaction is a purchase of paid media from a bot or a business account by the current user; relevant for regular users only
+    The transaction is a purchase of paid media from a bot or a business account by the current user; for regular users only
 
     :param user_id: Identifier of the bot or the business account user that sent the paid media
     :param media: The bought media if the transaction wasn't refunded
@@ -4152,7 +3605,7 @@ class StarTransactionTypeBotPaidMediaPurchase(StarTransactionType):
 @dataclass
 class StarTransactionTypeBotPaidMediaSale(StarTransactionType):
     """
-    The transaction is a sale of paid media by the bot or a business account managed by the bot; relevant for bots only
+    The transaction is a sale of paid media by the bot or a business account managed by the bot; for bots only
 
     :param user_id: Identifier of the user that bought the media
     :param media: The bought media
@@ -4169,7 +3622,7 @@ class StarTransactionTypeBotPaidMediaSale(StarTransactionType):
 @dataclass
 class StarTransactionTypeChannelPaidMediaPurchase(StarTransactionType):
     """
-    The transaction is a purchase of paid media from a channel by the current user; relevant for regular users only
+    The transaction is a purchase of paid media from a channel by the current user; for regular users only
 
     :param chat_id: Identifier of the channel chat that sent the paid media
     :param message_id: Identifier of the corresponding message with paid media; can be 0 or an identifier of a deleted message
@@ -4184,7 +3637,7 @@ class StarTransactionTypeChannelPaidMediaPurchase(StarTransactionType):
 @dataclass
 class StarTransactionTypeChannelPaidMediaSale(StarTransactionType):
     """
-    The transaction is a sale of paid media by the channel chat; relevant for channel chats only
+    The transaction is a sale of paid media by the channel chat; for channel chats only
 
     :param user_id: Identifier of the user that bought the media
     :param message_id: Identifier of the corresponding message with paid media; can be 0 or an identifier of a deleted message
@@ -4199,7 +3652,7 @@ class StarTransactionTypeChannelPaidMediaSale(StarTransactionType):
 @dataclass
 class StarTransactionTypeBotInvoicePurchase(StarTransactionType):
     """
-    The transaction is a purchase of a product from a bot or a business account by the current user; relevant for regular users only
+    The transaction is a purchase of a product from a bot or a business account by the current user; for regular users only
 
     :param user_id: Identifier of the bot or the business account user that created the invoice
     :param product_info: Information about the bought product
@@ -4212,7 +3665,7 @@ class StarTransactionTypeBotInvoicePurchase(StarTransactionType):
 @dataclass
 class StarTransactionTypeBotInvoiceSale(StarTransactionType):
     """
-    The transaction is a sale of a product by the bot; relevant for bots only
+    The transaction is a sale of a product by the bot; for bots only
 
     :param user_id: Identifier of the user that bought the product
     :param product_info: Information about the bought product
@@ -4229,7 +3682,7 @@ class StarTransactionTypeBotInvoiceSale(StarTransactionType):
 @dataclass
 class StarTransactionTypeBotSubscriptionPurchase(StarTransactionType):
     """
-    The transaction is a purchase of a subscription from a bot or a business account by the current user; relevant for regular users only
+    The transaction is a purchase of a subscription from a bot or a business account by the current user; for regular users only
 
     :param user_id: Identifier of the bot or the business account user that created the subscription link
     :param subscription_period: The number of seconds between consecutive Telegram Star debitings
@@ -4244,7 +3697,7 @@ class StarTransactionTypeBotSubscriptionPurchase(StarTransactionType):
 @dataclass
 class StarTransactionTypeBotSubscriptionSale(StarTransactionType):
     """
-    The transaction is a sale of a subscription by the bot; relevant for bots only
+    The transaction is a sale of a subscription by the bot; for bots only
 
     :param user_id: Identifier of the user that bought the subscription
     :param subscription_period: The number of seconds between consecutive Telegram Star debitings
@@ -4263,7 +3716,7 @@ class StarTransactionTypeBotSubscriptionSale(StarTransactionType):
 @dataclass
 class StarTransactionTypeChannelSubscriptionPurchase(StarTransactionType):
     """
-    The transaction is a purchase of a subscription to a channel chat by the current user; relevant for regular users only
+    The transaction is a purchase of a subscription to a channel chat by the current user; for regular users only
 
     :param chat_id: Identifier of the channel chat that created the subscription
     :param subscription_period: The number of seconds between consecutive Telegram Star debitings
@@ -4276,7 +3729,7 @@ class StarTransactionTypeChannelSubscriptionPurchase(StarTransactionType):
 @dataclass
 class StarTransactionTypeChannelSubscriptionSale(StarTransactionType):
     """
-    The transaction is a sale of a subscription by the channel chat; relevant for channel chats only
+    The transaction is a sale of a subscription by the channel chat; for channel chats only
 
     :param user_id: Identifier of the user that bought the subscription
     :param subscription_period: The number of seconds between consecutive Telegram Star debitings
@@ -4287,22 +3740,9 @@ class StarTransactionTypeChannelSubscriptionSale(StarTransactionType):
     subscription_period: "int" = 0
 
 @dataclass
-class StarTransactionTypeGiftAuctionBid(StarTransactionType):
-    """
-    The transaction is a bid on a gift auction; relevant for regular users only
-
-    :param owner_id: Identifier of the user that will receive the gift
-    :param gift: The gift
-    """
-
-    _type: "str" = field(default="starTransactionTypeGiftAuctionBid", init=False, repr=False)
-    owner_id: "MessageSender | None" = None
-    gift: "Gift | None" = None
-
-@dataclass
 class StarTransactionTypeGiftPurchase(StarTransactionType):
     """
-    The transaction is a purchase of a regular gift; relevant for regular users and bots only
+    The transaction is a purchase of a regular gift; for regular users and bots only
 
     :param owner_id: Identifier of the user or the channel that received the gift
     :param gift: The gift
@@ -4315,7 +3755,7 @@ class StarTransactionTypeGiftPurchase(StarTransactionType):
 @dataclass
 class StarTransactionTypeGiftTransfer(StarTransactionType):
     """
-    The transaction is a transfer of an upgraded gift; relevant for regular users only
+    The transaction is a transfer of an upgraded gift; for regular users only
 
     :param owner_id: Identifier of the user or the channel that received the gift
     :param gift: The gift
@@ -4326,22 +3766,9 @@ class StarTransactionTypeGiftTransfer(StarTransactionType):
     gift: "UpgradedGift | None" = None
 
 @dataclass
-class StarTransactionTypeGiftOriginalDetailsDrop(StarTransactionType):
-    """
-    The transaction is a drop of original details of an upgraded gift; relevant for regular users only
-
-    :param owner_id: Identifier of the user or the channel that owns the gift
-    :param gift: The gift
-    """
-
-    _type: "str" = field(default="starTransactionTypeGiftOriginalDetailsDrop", init=False, repr=False)
-    owner_id: "MessageSender | None" = None
-    gift: "UpgradedGift | None" = None
-
-@dataclass
 class StarTransactionTypeGiftSale(StarTransactionType):
     """
-    The transaction is a sale of a received gift; relevant for regular users and channel chats only
+    The transaction is a sale of a received gift; for regular users and channel chats only
 
     :param user_id: Identifier of the user that sent the gift
     :param gift: The gift
@@ -4354,7 +3781,7 @@ class StarTransactionTypeGiftSale(StarTransactionType):
 @dataclass
 class StarTransactionTypeGiftUpgrade(StarTransactionType):
     """
-    The transaction is an upgrade of a gift; relevant for regular users only
+    The transaction is an upgrade of a gift; for regular users only
 
     :param user_id: Identifier of the user that initially sent the gift
     :param gift: The upgraded gift
@@ -4365,22 +3792,9 @@ class StarTransactionTypeGiftUpgrade(StarTransactionType):
     gift: "UpgradedGift | None" = None
 
 @dataclass
-class StarTransactionTypeGiftUpgradePurchase(StarTransactionType):
-    """
-    The transaction is a purchase of an upgrade of a gift owned by another user or channel; relevant for regular users only
-
-    :param owner_id: Owner of the upgraded gift
-    :param gift: The gift
-    """
-
-    _type: "str" = field(default="starTransactionTypeGiftUpgradePurchase", init=False, repr=False)
-    owner_id: "MessageSender | None" = None
-    gift: "Gift | None" = None
-
-@dataclass
 class StarTransactionTypeUpgradedGiftPurchase(StarTransactionType):
     """
-    The transaction is a purchase of an upgraded gift for some user or channel; relevant for regular users only
+    The transaction is a purchase of an upgraded gift for some user or channel; for regular users only
 
     :param user_id: Identifier of the user that sold the gift
     :param gift: The gift
@@ -4393,24 +3807,22 @@ class StarTransactionTypeUpgradedGiftPurchase(StarTransactionType):
 @dataclass
 class StarTransactionTypeUpgradedGiftSale(StarTransactionType):
     """
-    The transaction is a sale of an upgraded gift; relevant for regular users only
+    The transaction is a sale of an upgraded gift; for regular users only
 
     :param user_id: Identifier of the user that bought the gift
     :param gift: The gift
-    :param commission_per_mille: The number of Telegram Stars received by the Telegram for each 1000 Telegram Stars received by the seller of the gift
-    :param commission_star_amount: The amount of Telegram Stars that were received by Telegram; can be negative for refunds
+    :param affiliate: Information about commission received by Telegram from the transaction
     """
 
     _type: "str" = field(default="starTransactionTypeUpgradedGiftSale", init=False, repr=False)
     user_id: "int" = 0
     gift: "UpgradedGift | None" = None
-    commission_per_mille: "int" = 0
-    commission_star_amount: "StarAmount | None" = None
+    affiliate: "AffiliateInfo | None" = None
 
 @dataclass
 class StarTransactionTypeChannelPaidReactionSend(StarTransactionType):
     """
-    The transaction is a sending of a paid reaction to a message in a channel chat by the current user; relevant for regular users only
+    The transaction is a sending of a paid reaction to a message in a channel chat by the current user; for regular users only
 
     :param chat_id: Identifier of the channel chat
     :param message_id: Identifier of the reacted message; can be 0 or an identifier of a deleted message
@@ -4423,7 +3835,7 @@ class StarTransactionTypeChannelPaidReactionSend(StarTransactionType):
 @dataclass
 class StarTransactionTypeChannelPaidReactionReceive(StarTransactionType):
     """
-    The transaction is a receiving of a paid reaction to a message by the channel chat; relevant for channel chats only
+    The transaction is a receiving of a paid reaction to a message by the channel chat; for channel chats only
 
     :param user_id: Identifier of the user that added the paid reaction
     :param message_id: Identifier of the reacted message; can be 0 or an identifier of a deleted message
@@ -4436,7 +3848,7 @@ class StarTransactionTypeChannelPaidReactionReceive(StarTransactionType):
 @dataclass
 class StarTransactionTypeAffiliateProgramCommission(StarTransactionType):
     """
-    The transaction is a receiving of a commission from an affiliate program; relevant for regular users, bots and channel chats only
+    The transaction is a receiving of a commission from an affiliate program; for regular users, bots and channel chats only
 
     :param chat_id: Identifier of the chat that created the affiliate program
     :param commission_per_mille: The number of Telegram Stars received by the affiliate for each 1000 Telegram Stars received by the program owner
@@ -4449,7 +3861,7 @@ class StarTransactionTypeAffiliateProgramCommission(StarTransactionType):
 @dataclass
 class StarTransactionTypePaidMessageSend(StarTransactionType):
     """
-    The transaction is a sending of a paid message; relevant for regular users only
+    The transaction is a sending of a paid message; for regular users only
 
     :param chat_id: Identifier of the chat that received the payment
     :param message_count: Number of sent paid messages
@@ -4462,7 +3874,7 @@ class StarTransactionTypePaidMessageSend(StarTransactionType):
 @dataclass
 class StarTransactionTypePaidMessageReceive(StarTransactionType):
     """
-    The transaction is a receiving of a paid message; relevant for regular users, supergroup and channel chats only
+    The transaction is a receiving of a paid message; for regular users, supergroup and channel chats only
 
     :param sender_id: Identifier of the sender of the message
     :param message_count: Number of received paid messages
@@ -4477,61 +3889,9 @@ class StarTransactionTypePaidMessageReceive(StarTransactionType):
     commission_star_amount: "StarAmount | None" = None
 
 @dataclass
-class StarTransactionTypePaidGroupCallMessageSend(StarTransactionType):
-    """
-    The transaction is a sending of a paid group call message; relevant for regular users only
-
-    :param chat_id: Identifier of the chat that received the payment
-    """
-
-    _type: "str" = field(default="starTransactionTypePaidGroupCallMessageSend", init=False, repr=False)
-    chat_id: "int" = 0
-
-@dataclass
-class StarTransactionTypePaidGroupCallMessageReceive(StarTransactionType):
-    """
-    The transaction is a receiving of a paid group call message; relevant for regular users and channel chats only
-
-    :param sender_id: Identifier of the sender of the message
-    :param commission_per_mille: The number of Telegram Stars received by the Telegram for each 1000 Telegram Stars paid for message sending
-    :param commission_star_amount: The amount of Telegram Stars that were received by Telegram; can be negative for refunds
-    """
-
-    _type: "str" = field(default="starTransactionTypePaidGroupCallMessageReceive", init=False, repr=False)
-    sender_id: "MessageSender | None" = None
-    commission_per_mille: "int" = 0
-    commission_star_amount: "StarAmount | None" = None
-
-@dataclass
-class StarTransactionTypePaidGroupCallReactionSend(StarTransactionType):
-    """
-    The transaction is a sending of a paid group reaction; relevant for regular users only
-
-    :param chat_id: Identifier of the chat that received the payment
-    """
-
-    _type: "str" = field(default="starTransactionTypePaidGroupCallReactionSend", init=False, repr=False)
-    chat_id: "int" = 0
-
-@dataclass
-class StarTransactionTypePaidGroupCallReactionReceive(StarTransactionType):
-    """
-    The transaction is a receiving of a paid group call reaction; relevant for regular users and channel chats only
-
-    :param sender_id: Identifier of the sender of the reaction
-    :param commission_per_mille: The number of Telegram Stars received by the Telegram for each 1000 Telegram Stars paid for reaction sending
-    :param commission_star_amount: The amount of Telegram Stars that were received by Telegram; can be negative for refunds
-    """
-
-    _type: "str" = field(default="starTransactionTypePaidGroupCallReactionReceive", init=False, repr=False)
-    sender_id: "MessageSender | None" = None
-    commission_per_mille: "int" = 0
-    commission_star_amount: "StarAmount | None" = None
-
-@dataclass
 class StarTransactionTypeSuggestedPostPaymentSend(StarTransactionType):
     """
-    The transaction is a payment for a suggested post; relevant for regular users only
+    The transaction is a payment for a suggested post; for regular users only
 
     :param chat_id: Identifier of the channel chat that posted the post
     """
@@ -4542,7 +3902,7 @@ class StarTransactionTypeSuggestedPostPaymentSend(StarTransactionType):
 @dataclass
 class StarTransactionTypeSuggestedPostPaymentReceive(StarTransactionType):
     """
-    The transaction is a receiving of a payment for a suggested post by the channel chat; relevant for channel chats only
+    The transaction is a receiving of a payment for a suggested post by the channel chat; for channel chats only
 
     :param user_id: Identifier of the user that paid for the suggested post
     """
@@ -4553,7 +3913,7 @@ class StarTransactionTypeSuggestedPostPaymentReceive(StarTransactionType):
 @dataclass
 class StarTransactionTypePremiumPurchase(StarTransactionType):
     """
-    The transaction is a purchase of Telegram Premium subscription; relevant for regular users and bots only
+    The transaction is a purchase of Telegram Premium subscription; for regular users and bots only
 
     :param user_id: Identifier of the user that received the Telegram Premium subscription
     :param month_count: Number of months the Telegram Premium subscription will be active
@@ -4568,7 +3928,7 @@ class StarTransactionTypePremiumPurchase(StarTransactionType):
 @dataclass
 class StarTransactionTypeBusinessBotTransferSend(StarTransactionType):
     """
-    The transaction is a transfer of Telegram Stars to a business bot; relevant for regular users only
+    The transaction is a transfer of Telegram Stars to a business bot; for regular users only
 
     :param user_id: Identifier of the bot that received Telegram Stars
     """
@@ -4579,22 +3939,13 @@ class StarTransactionTypeBusinessBotTransferSend(StarTransactionType):
 @dataclass
 class StarTransactionTypeBusinessBotTransferReceive(StarTransactionType):
     """
-    The transaction is a transfer of Telegram Stars from a business account; relevant for bots only
+    The transaction is a transfer of Telegram Stars from a business account; for bots only
 
     :param user_id: Identifier of the user that sent Telegram Stars
     """
 
     _type: "str" = field(default="starTransactionTypeBusinessBotTransferReceive", init=False, repr=False)
     user_id: "int" = 0
-
-@dataclass
-class StarTransactionTypePublicPostSearch(StarTransactionType):
-    """
-    The transaction is a payment for search of posts in public Telegram channels; relevant for regular users only
-
-    """
-
-    _type: "str" = field(default="starTransactionTypePublicPostSearch", init=False, repr=False)
 
 @dataclass
 class StarTransactionTypeUnsupported(StarTransactionType):
@@ -4673,36 +4024,6 @@ class TonTransactionTypeSuggestedPostPayment(TonTransactionType):
     chat_id: "int" = 0
 
 @dataclass
-class TonTransactionTypeUpgradedGiftPurchase(TonTransactionType):
-    """
-    The transaction is a purchase of an upgraded gift for some user or channel
-
-    :param user_id: Identifier of the user that sold the gift
-    :param gift: The gift
-    """
-
-    _type: "str" = field(default="tonTransactionTypeUpgradedGiftPurchase", init=False, repr=False)
-    user_id: "int" = 0
-    gift: "UpgradedGift | None" = None
-
-@dataclass
-class TonTransactionTypeUpgradedGiftSale(TonTransactionType):
-    """
-    The transaction is a sale of an upgraded gift
-
-    :param user_id: Identifier of the user that bought the gift
-    :param gift: The gift
-    :param commission_per_mille: The number of Toncoins received by the Telegram for each 1000 Toncoins received by the seller of the gift
-    :param commission_toncoin_amount: The amount of Toncoins that were received by the Telegram; in the smallest units of the currency
-    """
-
-    _type: "str" = field(default="tonTransactionTypeUpgradedGiftSale", init=False, repr=False)
-    user_id: "int" = 0
-    gift: "UpgradedGift | None" = None
-    commission_per_mille: "int" = 0
-    commission_toncoin_amount: "int" = 0
-
-@dataclass
 class TonTransactionTypeUnsupported(TonTransactionType):
     """
     The transaction is a transaction of an unsupported type
@@ -4744,44 +4065,6 @@ class TonTransactions(ObjectBase):
     ton_amount: "int" = 0
     transactions: "list[TonTransaction] | None" = None
     next_offset: "str" = ""
-
-@dataclass
-class ActiveStoryState(ObjectBase):
-    """
-    Describes state of active stories posted by a chat
-
-    """
-
-    _type: "str" = field(default="ActiveStoryState", init=False, repr=False)
-
-@dataclass
-class ActiveStoryStateLive(ActiveStoryState):
-    """
-    The chat has an active live story
-
-    :param story_id: Identifier of the active live story
-    """
-
-    _type: "str" = field(default="activeStoryStateLive", init=False, repr=False)
-    story_id: "int" = 0
-
-@dataclass
-class ActiveStoryStateUnread(ActiveStoryState):
-    """
-    The chat has some unread active stories
-
-    """
-
-    _type: "str" = field(default="activeStoryStateUnread", init=False, repr=False)
-
-@dataclass
-class ActiveStoryStateRead(ActiveStoryState):
-    """
-    The chat has active stories, all of which were read
-
-    """
-
-    _type: "str" = field(default="activeStoryStateRead", init=False, repr=False)
 
 @dataclass
 class GiveawayParticipantStatus(ObjectBase):
@@ -4977,42 +4260,6 @@ class ProfileAccentColor(ObjectBase):
     min_channel_chat_boost_level: "int" = 0
 
 @dataclass
-class UserRating(ObjectBase):
-    """
-    Contains description of user rating
-
-    :param level: The level of the user; may be negative
-    :param is_maximum_level_reached: True, if the maximum level is reached
-    :param rating: Numerical value of the rating
-    :param current_level_rating: The rating required for the current level
-    :param next_level_rating: The rating required for the next level; 0 if the maximum level is reached
-    """
-
-    _type: "str" = field(default="userRating", init=False, repr=False)
-    level: "int" = 0
-    is_maximum_level_reached: "bool" = False
-    rating: "int" = 0
-    current_level_rating: "int" = 0
-    next_level_rating: "int" = 0
-
-@dataclass
-class RestrictionInfo(ObjectBase):
-    """
-    Contains information about restrictions that must be applied to a chat or a message
-
-    :param restriction_reason: A human-readable description of the reason why access to the content must be restricted. If empty, then the content can be accessed,
-     but may be covered by hidden with 18+ spoiler anyway
-    :param has_sensitive_content: True, if media content of the messages must be hidden with 18+ spoiler.
-     Use value of the option "can_ignore_sensitive_content_restrictions" to check whether the current user can ignore the restriction.
-     If age verification parameters were received in updateAgeVerificationParameters, then the user must complete age verification to ignore the restriction.
-     Set the option "ignore_sensitive_content_restrictions" to true if the user passes age verification
-    """
-
-    _type: "str" = field(default="restrictionInfo", init=False, repr=False)
-    restriction_reason: "str" = ""
-    has_sensitive_content: "bool" = False
-
-@dataclass
 class EmojiStatusType(ObjectBase):
     """
     Describes type of emoji status
@@ -5095,15 +4342,13 @@ class Usernames(ObjectBase):
 
     :param active_usernames: List of active usernames; the first one must be shown as the primary username. The order of active usernames can be changed with reorderActiveUsernames, reorderBotActiveUsernames or reorderSupergroupActiveUsernames
     :param disabled_usernames: List of currently disabled usernames; the username can be activated with toggleUsernameIsActive, toggleBotUsernameIsActive, or toggleSupergroupUsernameIsActive
-    :param editable_username: Active or disabled username, which may be changed with setUsername or setSupergroupUsername
-    :param collectible_usernames: Collectible usernames that were purchased at https://fragment.com and can be passed to getCollectibleItemInfo for more details
+    :param editable_username: The active username, which can be changed with setUsername or setSupergroupUsername. Information about other active usernames can be received using getCollectibleItemInfo
     """
 
     _type: "str" = field(default="usernames", init=False, repr=False)
     active_usernames: "list[str] | None" = None
     disabled_usernames: "list[str] | None" = None
     editable_username: "str" = ""
-    collectible_usernames: "list[str] | None" = None
 
 @dataclass
 class User(ObjectBase):
@@ -5119,7 +4364,6 @@ class User(ObjectBase):
     :param profile_photo: Profile photo of the user; may be null
     :param accent_color_id: Identifier of the accent color for name, and backgrounds of profile photo, reply header, and link preview
     :param background_custom_emoji_id: Identifier of a custom emoji to be shown on the reply header and link preview background; 0 if none
-    :param upgraded_gift_colors: Color scheme based on an upgraded gift to be used for the user instead of accent_color_id and background_custom_emoji_id; may be null if none
     :param profile_accent_color_id: Identifier of the accent color for the user's profile; -1 if none
     :param profile_background_custom_emoji_id: Identifier of a custom emoji to be shown on the background of the user's profile; 0 if none
     :param emoji_status: Emoji status to be shown instead of the default Telegram Premium badge; may be null
@@ -5129,8 +4373,9 @@ class User(ObjectBase):
     :param verification_status: Information about verification status of the user; may be null if none
     :param is_premium: True, if the user is a Telegram Premium user
     :param is_support: True, if the user is Telegram support account
-    :param restriction_info: Information about restrictions that must be applied to the corresponding private chat; may be null if none
-    :param active_story_state: State of active stories of the user; may be null if the user has no active stories
+    :param restriction_reason: If non-empty, it contains a human-readable description of the reason why access to this user must be restricted
+    :param has_active_stories: True, if the user has non-expired stories available to the current user
+    :param has_unread_active_stories: True, if the user has unread non-expired stories available to the current user
     :param restricts_new_chats: True, if the user may restrict new chats with non-contacts. Use canSendMessageToUser to check whether the current user can message the user or try to create a chat with them
     :param paid_message_star_count: Number of Telegram Stars that must be paid by general user for each sent message to the user. If positive and userFullInfo is unknown, use canSendMessageToUser to check whether the current user must pay
     :param have_access: If false, the user is inaccessible, and the only information known about the user is inside this class. Identifier of the user can't be passed to any method
@@ -5149,7 +4394,6 @@ class User(ObjectBase):
     profile_photo: "ProfilePhoto | None" = None
     accent_color_id: "int" = 0
     background_custom_emoji_id: "int" = 0
-    upgraded_gift_colors: "UpgradedGiftColors | None" = None
     profile_accent_color_id: "int" = 0
     profile_background_custom_emoji_id: "int" = 0
     emoji_status: "EmojiStatus | None" = None
@@ -5159,8 +4403,9 @@ class User(ObjectBase):
     verification_status: "VerificationStatus | None" = None
     is_premium: "bool" = False
     is_support: "bool" = False
-    restriction_info: "RestrictionInfo | None" = None
-    active_story_state: "ActiveStoryState | None" = None
+    restriction_reason: "str" = ""
+    has_active_stories: "bool" = False
+    has_unread_active_stories: "bool" = False
     restricts_new_chats: "bool" = False
     paid_message_star_count: "int" = 0
     have_access: "bool" = False
@@ -5251,12 +4496,6 @@ class UserFullInfo(ObjectBase):
     :param outgoing_paid_message_star_count: Number of Telegram Stars that must be paid by the current user for each sent message to the user
     :param gift_settings: Settings for gift receiving for the user
     :param bot_verification: Information about verification status of the user provided by a bot; may be null if none or unknown
-    :param main_profile_tab: The main tab chosen by the user; may be null if not chosen manually
-    :param first_profile_audio: The first audio file added to the user's profile; may be null if none
-    :param rating: The current rating of the user; may be null if none
-    :param pending_rating: The rating of the user after the next change; may be null if the user isn't the current user or there are no pending rating changes
-    :param pending_rating_date: Unix timestamp when rating of the user will change to pending_rating; 0 if the user isn't the current user or there are no pending rating changes
-    :param note: Note added to the user's contact; may be null if none
     :param business_info: Information about business settings for Telegram Business accounts; may be null if none
     :param bot_info: For bots, information about the bot; may be null if the user isn't a bot
     """
@@ -5284,12 +4523,6 @@ class UserFullInfo(ObjectBase):
     outgoing_paid_message_star_count: "int" = 0
     gift_settings: "GiftSettings | None" = None
     bot_verification: "BotVerification | None" = None
-    main_profile_tab: "ProfileTab | None" = None
-    first_profile_audio: "Audio | None" = None
-    rating: "UserRating | None" = None
-    pending_rating: "UserRating | None" = None
-    pending_rating_date: "int" = 0
-    note: "FormattedText | None" = None
     business_info: "BusinessInfo | None" = None
     bot_info: "BotInfo | None" = None
 
@@ -5501,11 +4734,11 @@ class ChatMembersFilterMention(ChatMembersFilter):
     """
     Returns users which can be mentioned in the chat
 
-    :param topic_id: Identifier of the topic in which the users will be mentioned; pass null if none
+    :param message_thread_id: If non-zero, the identifier of the current message thread
     """
 
     _type: "str" = field(default="chatMembersFilterMention", init=False, repr=False)
-    topic_id: "MessageTopic | None" = None
+    message_thread_id: "int" = 0
 
 @dataclass
 class ChatMembersFilterRestricted(ChatMembersFilter):
@@ -5611,12 +4844,12 @@ class SupergroupMembersFilterMention(SupergroupMembersFilter):
     Returns users which can be mentioned in the supergroup
 
     :param query: Query to search for
-    :param topic_id: Identifier of the topic in which the users will be mentioned; pass null if none
+    :param message_thread_id: If non-zero, the identifier of the current message thread
     """
 
     _type: "str" = field(default="supergroupMembersFilterMention", init=False, repr=False)
     query: "str" = ""
-    topic_id: "MessageTopic | None" = None
+    message_thread_id: "int" = 0
 
 @dataclass
 class SupergroupMembersFilterBots(SupergroupMembersFilter):
@@ -5925,7 +5158,7 @@ class Supergroup(ObjectBase):
     :param sign_messages: True, if messages sent to the channel contains name of the sender. This field is only applicable to channels
     :param show_message_sender: True, if messages sent to the channel have information about the sender user. This field is only applicable to channels
     :param join_to_send_messages: True, if users need to join the supergroup before they can send messages. May be false only for discussion supergroups and channel direct messages groups
-    :param join_by_request: True, if all users directly joining the supergroup need to be approved by supergroup administrators. May be true only for non-broadcast supergroups with username, location, or a linked chat
+    :param join_by_request: True, if all users directly joining the supergroup need to be approved by supergroup administrators. Always false for channels and supergroups without username, location, or a linked chat
     :param is_slow_mode_enabled: True, if the slow mode is enabled in the supergroup
     :param is_channel: True, if the supergroup is a channel
     :param is_broadcast_group: True, if the supergroup is a broadcast group, i.e. only administrators can send messages and there is no limit on the number of members
@@ -5935,9 +5168,11 @@ class Supergroup(ObjectBase):
     :param verification_status: Information about verification status of the supergroup or channel; may be null if none
     :param has_direct_messages_group: True, if the channel has direct messages group
     :param has_forum_tabs: True, if the supergroup is a forum, which topics are shown in the same way as in channel direct messages groups
-    :param restriction_info: Information about the restrictions that must be applied to the corresponding supergroup or channel chat; may be null if none
+    :param has_sensitive_content: True, if content of media messages in the supergroup or channel chat must be hidden with 18+ spoiler
+    :param restriction_reason: If non-empty, contains a human-readable description of the reason why access to this supergroup or channel must be restricted
     :param paid_message_star_count: Number of Telegram Stars that must be paid by non-administrator users of the supergroup chat for each sent message
-    :param active_story_state: State of active stories of the supergroup or channel; may be null if there are no active stories
+    :param has_active_stories: True, if the supergroup or channel has non-expired stories available to the current user
+    :param has_unread_active_stories: True, if the supergroup or channel has unread non-expired stories available to the current user
     """
 
     _type: "str" = field(default="supergroup", init=False, repr=False)
@@ -5963,9 +5198,11 @@ class Supergroup(ObjectBase):
     verification_status: "VerificationStatus | None" = None
     has_direct_messages_group: "bool" = False
     has_forum_tabs: "bool" = False
-    restriction_info: "RestrictionInfo | None" = None
+    has_sensitive_content: "bool" = False
+    restriction_reason: "str" = ""
     paid_message_star_count: "int" = 0
-    active_story_state: "ActiveStoryState | None" = None
+    has_active_stories: "bool" = False
+    has_unread_active_stories: "bool" = False
 
 @dataclass
 class SupergroupFullInfo(ObjectBase):
@@ -6010,7 +5247,6 @@ class SupergroupFullInfo(ObjectBase):
     :param invite_link: Primary invite link for the chat; may be null. For chat administrators with can_invite_users right only
     :param bot_commands: List of commands of bots in the group
     :param bot_verification: Information about verification status of the supergroup or the channel provided by a bot; may be null if none or unknown
-    :param main_profile_tab: The main tab chosen by the administrators of the channel; may be null if not chosen manually
     :param upgraded_from_basic_group_id: Identifier of the basic group from which supergroup was upgraded; 0 if none
     :param upgraded_from_max_message_id: Identifier of the last message in the basic group from which supergroup was upgraded; 0 if none
     """
@@ -6053,7 +5289,6 @@ class SupergroupFullInfo(ObjectBase):
     invite_link: "ChatInviteLink | None" = None
     bot_commands: "list[BotCommands] | None" = None
     bot_verification: "BotVerification | None" = None
-    main_profile_tab: "ProfileTab | None" = None
     upgraded_from_basic_group_id: "int" = 0
     upgraded_from_max_message_id: "int" = 0
 
@@ -6115,25 +5350,6 @@ class SecretChat(ObjectBase):
     is_outbound: "bool" = False
     key_hash: "bytes" = b""
     layer: "int" = 0
-
-@dataclass
-class PublicPostSearchLimits(ObjectBase):
-    """
-    Contains information about public post search limits
-
-    :param daily_free_query_count: Number of queries that can be sent daily for free
-    :param remaining_free_query_count: Number of remaining free queries today
-    :param next_free_query_in: Amount of time till the next free query can be sent; 0 if it can be sent now
-    :param star_count: Number of Telegram Stars that must be paid for each non-free query
-    :param is_current_query_free: True, if the search for the specified query isn't charged
-    """
-
-    _type: "str" = field(default="publicPostSearchLimits", init=False, repr=False)
-    daily_free_query_count: "int" = 0
-    remaining_free_query_count: "int" = 0
-    next_free_query_in: "int" = 0
-    star_count: "int" = 0
-    is_current_query_free: "bool" = False
 
 @dataclass
 class MessageSender(ObjectBase):
@@ -6461,19 +5677,6 @@ class PaidReactor(ObjectBase):
     is_anonymous: "bool" = False
 
 @dataclass
-class LiveStoryDonors(ObjectBase):
-    """
-    Contains a list of users and chats that spend most money on paid messages and reactions in a live story
-
-    :param total_star_count: Total amount of spend Telegram Stars
-    :param top_donors: List of top donors in the live story
-    """
-
-    _type: "str" = field(default="liveStoryDonors", init=False, repr=False)
-    total_star_count: "int" = 0
-    top_donors: "list[PaidReactor] | None" = None
-
-@dataclass
 class MessageForwardInfo(ObjectBase):
     """
     Contains information about a forwarded message
@@ -6600,22 +5803,11 @@ class MessageTopic(ObjectBase):
     _type: "str" = field(default="MessageTopic", init=False, repr=False)
 
 @dataclass
-class MessageTopicThread(MessageTopic):
-    """
-    A topic in a non-forum supergroup chat
-
-    :param message_thread_id: Unique identifier of the message thread
-    """
-
-    _type: "str" = field(default="messageTopicThread", init=False, repr=False)
-    message_thread_id: "int" = 0
-
-@dataclass
 class MessageTopicForum(MessageTopic):
     """
-    A topic in a forum supergroup chat or a chat with a bot
+    A topic in a forum supergroup chat
 
-    :param forum_topic_id: Unique identifier of the forum topic
+    :param forum_topic_id: Unique identifier of the forum topic; all messages in a non-forum supergroup chats belongs to the General topic
     """
 
     _type: "str" = field(default="messageTopicForum", init=False, repr=False)
@@ -6909,7 +6101,8 @@ class Message(ObjectBase):
     :param fact_check: Information about fact-check added to the message; may be null if none
     :param suggested_post_info: Information about the suggested post; may be null if the message isn't a suggested post
     :param reply_to: Information about the message or the story this message is replying to; may be null if none
-    :param topic_id: Identifier of the topic within the chat to which the message belongs; may be null if none; may change when the chat is converted to a forum or back
+    :param message_thread_id: If non-zero, the identifier of the message thread the message belongs to; unique within the chat to which the message belongs
+    :param topic_id: Identifier of the topic within the chat to which the message belongs; may be null if none
     :param self_destruct_type: The message's self-destruct type; may be null if none
     :param self_destruct_in: Time left before the message self-destruct timer expires, in seconds; 0 if self-destruction isn't scheduled yet
     :param auto_delete_in: Time left before the message will be automatically deleted by message_auto_delete_time setting of the chat, in seconds; 0 if never
@@ -6920,7 +6113,8 @@ class Message(ObjectBase):
     :param author_signature: For channel posts and anonymous group messages, optional author signature
     :param media_album_id: Unique identifier of an album this message belongs to; 0 if none. Only audios, documents, photos and videos can be grouped together in albums
     :param effect_id: Unique identifier of the effect added to the message; 0 if none
-    :param restriction_info: Information about the restrictions that must be applied to the message content; may be null if none
+    :param has_sensitive_content: True, if media content of the message must be hidden with 18+ spoiler
+    :param restriction_reason: If non-empty, contains a human-readable description of the reason why access to this message must be restricted
     :param content: Content of the message
     :param reply_markup: Reply markup for the message; may be null if none
     """
@@ -6949,6 +6143,7 @@ class Message(ObjectBase):
     fact_check: "FactCheck | None" = None
     suggested_post_info: "SuggestedPostInfo | None" = None
     reply_to: "MessageReplyTo | None" = None
+    message_thread_id: "int" = 0
     topic_id: "MessageTopic | None" = None
     self_destruct_type: "MessageSelfDestructType | None" = None
     self_destruct_in: "float" = 0
@@ -6960,7 +6155,8 @@ class Message(ObjectBase):
     author_signature: "str" = ""
     media_album_id: "int" = 0
     effect_id: "int" = 0
-    restriction_info: "RestrictionInfo | None" = None
+    has_sensitive_content: "bool" = False
+    restriction_reason: "str" = ""
     content: "MessageContent | None" = None
     reply_markup: "ReplyMarkup | None" = None
 
@@ -7006,23 +6202,6 @@ class FoundChatMessages(ObjectBase):
     total_count: "int" = 0
     messages: "list[Message] | None" = None
     next_from_message_id: "int" = 0
-
-@dataclass
-class FoundPublicPosts(ObjectBase):
-    """
-    Contains a list of messages found by a public post search
-
-    :param messages: List of found public posts
-    :param next_offset: The offset for the next request. If empty, then there are no more results
-    :param search_limits: Updated public post search limits after the query; repeated requests with the same query will be free; may be null if they didn't change
-    :param are_limits_exceeded: True, if the query has failed because search limits are exceeded. In this case search_limits.daily_free_query_count will be equal to 0
-    """
-
-    _type: "str" = field(default="foundPublicPosts", init=False, repr=False)
-    messages: "list[Message] | None" = None
-    next_offset: "str" = ""
-    search_limits: "PublicPostSearchLimits | None" = None
-    are_limits_exceeded: "bool" = False
 
 @dataclass
 class MessagePosition(ObjectBase):
@@ -7617,7 +6796,7 @@ class DraftMessage(ObjectBase):
     """
     Contains information about a message draft
 
-    :param reply_to: Information about the message to be replied; inputMessageReplyToStory is unsupported; may be null if none
+    :param reply_to: Information about the message to be replied; must be of the type inputMessageReplyToMessage; may be null if none
     :param date: Point in time (Unix timestamp) when the draft was created
     :param input_message_text: Content of the message draft; must be of the type inputMessageText, inputMessageVideoNote, or inputMessageVoiceNote
     :param effect_id: Identifier of the effect to apply to the message when it is sent; 0 if none
@@ -8051,7 +7230,6 @@ class Chat(ObjectBase):
     :param photo: Chat photo; may be null
     :param accent_color_id: Identifier of the accent color for message sender name, and backgrounds of chat photo, reply header, and link preview
     :param background_custom_emoji_id: Identifier of a custom emoji to be shown on the reply header and link preview background for messages sent by the chat; 0 if none
-    :param upgraded_gift_colors: Color scheme based on an upgraded gift to be used for the chat instead of accent_color_id and background_custom_emoji_id; may be null if none
     :param profile_accent_color_id: Identifier of the profile accent color for the chat's profile; -1 if none
     :param profile_background_custom_emoji_id: Identifier of a custom emoji to be shown on the background of the chat's profile; 0 if none
     :param permissions: Actions that non-administrator chat members are allowed to take in the chat
@@ -8079,7 +7257,7 @@ class Chat(ObjectBase):
     :param message_auto_delete_time: Current message auto-delete or self-destruct timer setting for the chat, in seconds; 0 if disabled. Self-destruct timer in secret chats starts after the message or its content is viewed. Auto-delete timer in other chats starts from the send date
     :param emoji_status: Emoji status to be shown along with chat title; may be null
     :param background: Background set for the chat; may be null if none
-    :param theme: Theme set for the chat; may be null if none
+    :param theme_name: If non-empty, name of a theme, set for the chat
     :param action_bar: Information about actions which must be possible to do through the chat action bar; may be null if none
     :param business_bot_manage_bar: Information about bar for managing a business bot in the chat; may be null if none
     :param video_chat: Information about video chat of the chat
@@ -8096,7 +7274,6 @@ class Chat(ObjectBase):
     photo: "ChatPhotoInfo | None" = None
     accent_color_id: "int" = 0
     background_custom_emoji_id: "int" = 0
-    upgraded_gift_colors: "UpgradedGiftColors | None" = None
     profile_accent_color_id: "int" = 0
     profile_background_custom_emoji_id: "int" = 0
     permissions: "ChatPermissions | None" = None
@@ -8124,7 +7301,7 @@ class Chat(ObjectBase):
     message_auto_delete_time: "int" = 0
     emoji_status: "EmojiStatus | None" = None
     background: "ChatBackground | None" = None
-    theme: "ChatTheme | None" = None
+    theme_name: "str" = ""
     action_bar: "ChatActionBar | None" = None
     business_bot_manage_bar: "BusinessBotManageBar | None" = None
     video_chat: "VideoChat | None" = None
@@ -8900,7 +8077,7 @@ class DirectMessagesChatTopic(ObjectBase):
     :param sender_id: Identifier of the user or chat that sends the messages to the topic
     :param order: A parameter used to determine order of the topic in the topic list. Topics must be sorted by the order in descending order
     :param can_send_unpaid_messages: True, if the other party can send unpaid messages even if the chat has paid messages enabled
-    :param is_marked_as_unread: True, if the topic is marked as unread
+    :param is_marked_as_unread: True, if the forum topic is marked as unread
     :param unread_count: Number of unread messages in the chat
     :param last_read_inbox_message_id: Identifier of the last read incoming message
     :param last_read_outbox_message_id: Identifier of the last read outgoing message
@@ -8941,22 +8118,23 @@ class ForumTopicInfo(ObjectBase):
     """
     Contains basic information about a forum topic
 
-    :param chat_id: Identifier of a forum supergroup chat or a chat with a bot to which the topic belongs
+    :param chat_id: Identifier of the forum chat to which the topic belongs
     :param forum_topic_id: Forum topic identifier of the topic
+    :param message_thread_id: Message thread identifier of the topic
     :param name: Name of the topic
     :param icon: Icon of the topic
     :param creation_date: Point in time (Unix timestamp) when the topic was created
     :param creator_id: Identifier of the creator of the topic
-    :param is_general: True, if the topic is the General topic
+    :param is_general: True, if the topic is the General topic list
     :param is_outgoing: True, if the topic was created by the current user
     :param is_closed: True, if the topic is closed. If the topic is closed, then the user must have can_manage_topics administrator right in the supergroup or must be the creator of the topic to send messages there
     :param is_hidden: True, if the topic is hidden above the topic list and closed; for General topic only
-    :param is_name_implicit: True, if the name of the topic wasn't added explicitly
     """
 
     _type: "str" = field(default="forumTopicInfo", init=False, repr=False)
     chat_id: "int" = 0
     forum_topic_id: "int" = 0
+    message_thread_id: "int" = 0
     name: "str" = ""
     icon: "ForumTopicIcon | None" = None
     creation_date: "int" = 0
@@ -8965,7 +8143,6 @@ class ForumTopicInfo(ObjectBase):
     is_outgoing: "bool" = False
     is_closed: "bool" = False
     is_hidden: "bool" = False
-    is_name_implicit: "bool" = False
 
 @dataclass
 class ForumTopic(ObjectBase):
@@ -9007,7 +8184,7 @@ class ForumTopics(ObjectBase):
     :param topics: List of forum topics
     :param next_offset_date: Offset date for the next getForumTopics request
     :param next_offset_message_id: Offset message identifier for the next getForumTopics request
-    :param next_offset_forum_topic_id: Offset forum topic identifier for the next getForumTopics request
+    :param next_offset_message_thread_id: Offset message thread identifier for the next getForumTopics request
     """
 
     _type: "str" = field(default="forumTopics", init=False, repr=False)
@@ -9015,7 +8192,7 @@ class ForumTopics(ObjectBase):
     topics: "list[ForumTopic] | None" = None
     next_offset_date: "int" = 0
     next_offset_message_id: "int" = 0
-    next_offset_forum_topic_id: "int" = 0
+    next_offset_message_thread_id: "int" = 0
 
 @dataclass
 class LinkPreviewOptions(ObjectBase):
@@ -9073,74 +8250,18 @@ class SharedChat(ObjectBase):
     photo: "Photo | None" = None
 
 @dataclass
-class BuiltInTheme(ObjectBase):
-    """
-    Describes a built-in theme of an official app
-
-    """
-
-    _type: "str" = field(default="BuiltInTheme", init=False, repr=False)
-
-@dataclass
-class BuiltInThemeClassic(BuiltInTheme):
-    """
-    Classic light theme
-
-    """
-
-    _type: "str" = field(default="builtInThemeClassic", init=False, repr=False)
-
-@dataclass
-class BuiltInThemeDay(BuiltInTheme):
-    """
-    Regular light theme
-
-    """
-
-    _type: "str" = field(default="builtInThemeDay", init=False, repr=False)
-
-@dataclass
-class BuiltInThemeNight(BuiltInTheme):
-    """
-    Regular dark theme
-
-    """
-
-    _type: "str" = field(default="builtInThemeNight", init=False, repr=False)
-
-@dataclass
-class BuiltInThemeTinted(BuiltInTheme):
-    """
-    Tinted dark theme
-
-    """
-
-    _type: "str" = field(default="builtInThemeTinted", init=False, repr=False)
-
-@dataclass
-class BuiltInThemeArctic(BuiltInTheme):
-    """
-    Arctic light theme
-
-    """
-
-    _type: "str" = field(default="builtInThemeArctic", init=False, repr=False)
-
-@dataclass
 class ThemeSettings(ObjectBase):
     """
     Describes theme settings
 
-    :param base_theme: Base theme for this theme
     :param accent_color: Theme accent color in ARGB format
     :param background: The background to be used in chats; may be null
-    :param outgoing_message_fill: The fill to be used as a background for outgoing messages; may be null if the fill from the base theme must be used instead
+    :param outgoing_message_fill: The fill to be used as a background for outgoing messages
     :param animate_outgoing_message_fill: If true, the freeform gradient fill needs to be animated on every sent message
     :param outgoing_message_accent_color: Accent color of outgoing messages in ARGB format
     """
 
     _type: "str" = field(default="themeSettings", init=False, repr=False)
-    base_theme: "BuiltInTheme | None" = None
     accent_color: "int" = 0
     background: "Background | None" = None
     outgoing_message_fill: "BackgroundFill | None" = None
@@ -10067,17 +9188,6 @@ class LinkPreviewTypeChat(LinkPreviewType):
     creates_join_request: "bool" = False
 
 @dataclass
-class LinkPreviewTypeDirectMessagesChat(LinkPreviewType):
-    """
-    The link is a link to a direct messages chat of a channel
-
-    :param photo: Photo of the channel chat; may be null
-    """
-
-    _type: "str" = field(default="linkPreviewTypeDirectMessagesChat", init=False, repr=False)
-    photo: "ChatPhoto | None" = None
-
-@dataclass
 class LinkPreviewTypeDocument(LinkPreviewType):
     """
     The link is a link to a general file
@@ -10180,32 +9290,6 @@ class LinkPreviewTypeExternalVideo(LinkPreviewType):
     duration: "int" = 0
 
 @dataclass
-class LinkPreviewTypeGiftAuction(LinkPreviewType):
-    """
-    The link is a link to a gift auction
-
-    :param gift: The gift
-    :param gift_background: Background of the gift
-    :param auction_end_date: Point in time (Unix timestamp) when the auction will be ended
-    """
-
-    _type: "str" = field(default="linkPreviewTypeGiftAuction", init=False, repr=False)
-    gift: "Gift | None" = None
-    gift_background: "GiftBackground | None" = None
-    auction_end_date: "int" = 0
-
-@dataclass
-class LinkPreviewTypeGiftCollection(LinkPreviewType):
-    """
-    The link is a link to a gift collection
-
-    :param icons: Icons for some gifts from the collection; may be empty
-    """
-
-    _type: "str" = field(default="linkPreviewTypeGiftCollection", init=False, repr=False)
-    icons: "list[Sticker] | None" = None
-
-@dataclass
 class LinkPreviewTypeGroupCall(LinkPreviewType):
     """
     The link is a link to a group call that isn't bound to a chat
@@ -10222,19 +9306,6 @@ class LinkPreviewTypeInvoice(LinkPreviewType):
     """
 
     _type: "str" = field(default="linkPreviewTypeInvoice", init=False, repr=False)
-
-@dataclass
-class LinkPreviewTypeLiveStory(LinkPreviewType):
-    """
-    The link is a link to a live story group call
-
-    :param story_poster_chat_id: The identifier of the chat that posted the story
-    :param story_id: Story identifier
-    """
-
-    _type: "str" = field(default="linkPreviewTypeLiveStory", init=False, repr=False)
-    story_poster_chat_id: "int" = 0
-    story_id: "int" = 0
 
 @dataclass
 class LinkPreviewTypeMessage(LinkPreviewType):
@@ -10308,19 +9379,6 @@ class LinkPreviewTypeStory(LinkPreviewType):
     _type: "str" = field(default="linkPreviewTypeStory", init=False, repr=False)
     story_poster_chat_id: "int" = 0
     story_id: "int" = 0
-
-@dataclass
-class LinkPreviewTypeStoryAlbum(LinkPreviewType):
-    """
-    The link is a link to an album of stories
-
-    :param photo_icon: Icon of the album; may be null if none
-    :param video_icon: Video icon of the album; may be null if none
-    """
-
-    _type: "str" = field(default="linkPreviewTypeStoryAlbum", init=False, repr=False)
-    photo_icon: "Photo | None" = None
-    video_icon: "Video | None" = None
 
 @dataclass
 class LinkPreviewTypeSupergroupBoost(LinkPreviewType):
@@ -12645,11 +11703,11 @@ class MessageChatSetTheme(MessageContent):
     """
     A theme in the chat has been changed
 
-    :param theme: New theme for the chat; may be null if chat theme was reset to the default one
+    :param theme_name: If non-empty, name of a new theme, set for the chat. Otherwise, chat theme was reset to the default one
     """
 
     _type: "str" = field(default="messageChatSetTheme", init=False, repr=False)
-    theme: "ChatTheme | None" = None
+    theme_name: "str" = ""
 
 @dataclass
 class MessageChatSetMessageAutoDeleteTime(MessageContent):
@@ -12681,13 +11739,11 @@ class MessageForumTopicCreated(MessageContent):
     A forum topic has been created
 
     :param name: Name of the topic
-    :param is_name_implicit: True, if the name of the topic wasn't added explicitly
     :param icon: Icon of the topic
     """
 
     _type: "str" = field(default="messageForumTopicCreated", init=False, repr=False)
     name: "str" = ""
-    is_name_implicit: "bool" = False
     icon: "ForumTopicIcon | None" = None
 
 @dataclass
@@ -12737,17 +11793,6 @@ class MessageSuggestProfilePhoto(MessageContent):
 
     _type: "str" = field(default="messageSuggestProfilePhoto", init=False, repr=False)
     photo: "ChatPhoto | None" = None
-
-@dataclass
-class MessageSuggestBirthdate(MessageContent):
-    """
-    A birthdate was suggested to be set
-
-    :param birthdate: The suggested birthdate. Use the method setBirthdate to apply the birthdate
-    """
-
-    _type: "str" = field(default="messageSuggestBirthdate", init=False, repr=False)
-    birthdate: "Birthdate | None" = None
 
 @dataclass
 class MessageCustomServiceAction(MessageContent):
@@ -12862,8 +11907,7 @@ class MessageGiftedPremium(MessageContent):
     :param amount: The paid amount, in the smallest units of the currency
     :param cryptocurrency: Cryptocurrency used to pay for the gift; may be empty if none
     :param cryptocurrency_amount: The paid amount, in the smallest units of the cryptocurrency; 0 if none
-    :param month_count: Number of months the Telegram Premium subscription will be active after code activation; 0 if the number of months isn't integer
-    :param day_count: Number of days the Telegram Premium subscription will be active
+    :param month_count: Number of months the Telegram Premium subscription will be active
     :param sticker: A sticker to be shown in the message; may be null if unknown
     """
 
@@ -12876,7 +11920,6 @@ class MessageGiftedPremium(MessageContent):
     cryptocurrency: "str" = ""
     cryptocurrency_amount: "int" = 0
     month_count: "int" = 0
-    day_count: "int" = 0
     sticker: "Sticker | None" = None
 
 @dataclass
@@ -12892,8 +11935,7 @@ class MessagePremiumGiftCode(MessageContent):
     :param amount: The paid amount, in the smallest units of the currency; 0 if unknown
     :param cryptocurrency: Cryptocurrency used to pay for the gift; may be empty if none or unknown
     :param cryptocurrency_amount: The paid amount, in the smallest units of the cryptocurrency; 0 if unknown
-    :param month_count: Number of months the Telegram Premium subscription will be active after code activation; 0 if the number of months isn't integer
-    :param day_count: Number of days the Telegram Premium subscription will be active after code activation
+    :param month_count: Number of months the Telegram Premium subscription will be active after code activation
     :param sticker: A sticker to be shown in the message; may be null if unknown
     :param code: The gift code
     """
@@ -12908,7 +11950,6 @@ class MessagePremiumGiftCode(MessageContent):
     cryptocurrency: "str" = ""
     cryptocurrency_amount: "int" = 0
     month_count: "int" = 0
-    day_count: "int" = 0
     sticker: "Sticker | None" = None
     code: "str" = ""
 
@@ -13061,23 +12102,19 @@ class MessageGift(MessageContent):
     A regular gift was received or sent by the current user, or the current user was notified about a channel gift
 
     :param gift: The gift
-    :param sender_id: Sender of the gift; may be null for outgoing messages about prepaid upgrade of gifts from unknown users
+    :param sender_id: Sender of the gift
     :param receiver_id: Receiver of the gift
     :param received_gift_id: Unique identifier of the received gift for the current user; only for the receiver of the gift
     :param text: Message added to the gift
     :param sell_star_count: Number of Telegram Stars that can be claimed by the receiver instead of the regular gift; 0 if the gift can't be sold by the receiver
     :param prepaid_upgrade_star_count: Number of Telegram Stars that were paid by the sender for the ability to upgrade the gift
-    :param is_upgrade_separate: True, if the upgrade was bought after the gift was sent. In this case, prepaid upgrade cost must not be added to the gift cost
-    :param is_from_auction: True, if the message is a notification about a gift won on an auction
     :param is_private: True, if the sender and gift text are shown only to the gift receiver; otherwise, everyone will be able to see them
     :param is_saved: True, if the gift is displayed on the user's or the channel's profile page; only for the receiver of the gift
-    :param is_prepaid_upgrade: True, if the message is about prepaid upgrade of the gift by another user
     :param can_be_upgraded: True, if the gift can be upgraded to a unique gift; only for the receiver of the gift
     :param was_converted: True, if the gift was converted to Telegram Stars; only for the receiver of the gift
     :param was_upgraded: True, if the gift was upgraded to a unique gift
     :param was_refunded: True, if the gift was refunded and isn't available anymore
     :param upgraded_received_gift_id: Identifier of the corresponding upgraded gift; may be empty if unknown. Use getReceivedGift to get information about the gift
-    :param prepaid_upgrade_hash: If non-empty, then the user can pay for an upgrade of the gift using buyGiftUpgrade
     """
 
     _type: "str" = field(default="messageGift", init=False, repr=False)
@@ -13088,17 +12125,13 @@ class MessageGift(MessageContent):
     text: "FormattedText | None" = None
     sell_star_count: "int" = 0
     prepaid_upgrade_star_count: "int" = 0
-    is_upgrade_separate: "bool" = False
-    is_from_auction: "bool" = False
     is_private: "bool" = False
     is_saved: "bool" = False
-    is_prepaid_upgrade: "bool" = False
     can_be_upgraded: "bool" = False
     was_converted: "bool" = False
     was_upgraded: "bool" = False
     was_refunded: "bool" = False
     upgraded_received_gift_id: "str" = ""
-    prepaid_upgrade_hash: "str" = ""
 
 @dataclass
 class MessageUpgradedGift(MessageContent):
@@ -13114,10 +12147,9 @@ class MessageUpgradedGift(MessageContent):
     :param can_be_transferred: True, if the gift can be transferred to another owner; only for the receiver of the gift
     :param was_transferred: True, if the gift has already been transferred to another owner; only for the receiver of the gift
     :param transfer_star_count: Number of Telegram Stars that must be paid to transfer the upgraded gift; only for the receiver of the gift
-    :param drop_original_details_star_count: Number of Telegram Stars that must be paid to drop original details of the upgraded gift; 0 if not available; only for the receiver of the gift
-    :param next_transfer_date: Point in time (Unix timestamp) when the gift can be transferred to another owner; can be in the past; 0 if the gift can be transferred immediately or transfer isn't possible; only for the receiver of the gift
-    :param next_resale_date: Point in time (Unix timestamp) when the gift can be resold to another user; can be in the past; 0 if the gift can't be resold; only for the receiver of the gift
-    :param export_date: Point in time (Unix timestamp) when the gift can be transferred to the TON blockchain as an NFT; can be in the past; 0 if NFT export isn't possible; only for the receiver of the gift
+    :param next_transfer_date: Point in time (Unix timestamp) when the gift can be transferred to another owner; 0 if the gift can be transferred immediately or transfer isn't possible; only for the receiver of the gift
+    :param next_resale_date: Point in time (Unix timestamp) when the gift can be resold to another user; 0 if the gift can't be resold; only for the receiver of the gift
+    :param export_date: Point in time (Unix timestamp) when the gift can be transferred to the TON blockchain as an NFT; 0 if NFT export isn't possible; only for the receiver of the gift
     """
 
     _type: "str" = field(default="messageUpgradedGift", init=False, repr=False)
@@ -13130,7 +12162,6 @@ class MessageUpgradedGift(MessageContent):
     can_be_transferred: "bool" = False
     was_transferred: "bool" = False
     transfer_star_count: "int" = 0
-    drop_original_details_star_count: "int" = 0
     next_transfer_date: "int" = 0
     next_resale_date: "int" = 0
     export_date: "int" = 0
@@ -13143,14 +12174,14 @@ class MessageRefundedUpgradedGift(MessageContent):
     :param gift: The gift
     :param sender_id: Sender of the gift
     :param receiver_id: Receiver of the gift
-    :param origin: Origin of the upgraded gift
+    :param is_upgrade: True, if the gift was obtained by upgrading of a previously received gift; otherwise, this is a transferred or resold gift
     """
 
     _type: "str" = field(default="messageRefundedUpgradedGift", init=False, repr=False)
     gift: "Gift | None" = None
     sender_id: "MessageSender | None" = None
     receiver_id: "MessageSender | None" = None
-    origin: "UpgradedGiftOrigin | None" = None
+    is_upgrade: "bool" = False
 
 @dataclass
 class MessagePaidMessagesRefunded(MessageContent):
@@ -13708,13 +12739,10 @@ class MessageSchedulingStateSendAtDate(MessageSchedulingState):
     The message will be sent at the specified date
 
     :param send_date: Point in time (Unix timestamp) when the message will be sent. The date must be within 367 days in the future
-    :param repeat_period: Period after which the message will be sent again; in seconds; 0 if never; for Telegram Premium users only; may be non-zero only in sendMessage and forwardMessages with one message requests;
-     must be one of 0, 86400, 7 * 86400, 14 * 86400, 30 * 86400, 91 * 86400, 182 * 86400, 365 * 86400, or additionally 60, or 300 in the Test DC
     """
 
     _type: "str" = field(default="messageSchedulingStateSendAtDate", init=False, repr=False)
     send_date: "int" = 0
-    repeat_period: "int" = 0
 
 @dataclass
 class MessageSchedulingStateSendWhenOnline(MessageSchedulingState):
@@ -13770,6 +12798,7 @@ class MessageSendOptions(ObjectBase):
     """
     Options to be used when a message is sent
 
+    :param direct_messages_chat_topic_id: Unique identifier of the topic in a channel direct messages chat administered by the current user; pass 0 if the chat isn't a channel direct messages chat administered by the current user
     :param suggested_post_info: Information about the suggested post; pass null if none. For messages to channel direct messages chat only. Applicable only to sendMessage and addOffer
     :param disable_notification: Pass true to disable notification for the message
     :param from_background: Pass true if the message is sent from the background
@@ -13785,6 +12814,7 @@ class MessageSendOptions(ObjectBase):
     """
 
     _type: "str" = field(default="messageSendOptions", init=False, repr=False)
+    direct_messages_chat_topic_id: "int" = 0
     suggested_post_info: "InputSuggestedPostInfo | None" = None
     disable_notification: "bool" = False
     from_background: "bool" = False
@@ -15324,19 +14354,6 @@ class StoryContentVideo(StoryContent):
     alternative_video: "StoryVideo | None" = None
 
 @dataclass
-class StoryContentLive(StoryContent):
-    """
-    A live story
-
-    :param group_call_id: Identifier of the corresponding group call. The group call can be received through the method getGroupCall
-    :param is_rtmp_stream: True, if the call is an RTMP stream instead of an ordinary group call
-    """
-
-    _type: "str" = field(default="storyContentLive", init=False, repr=False)
-    group_call_id: "int" = 0
-    is_rtmp_stream: "bool" = False
-
-@dataclass
 class StoryContentUnsupported(StoryContent):
     """
     A story content that is not supported in the current TDLib version
@@ -15490,12 +14507,10 @@ class Story(ObjectBase):
     :param is_edited: True, if the story was edited
     :param is_posted_to_chat_page: True, if the story is saved in the profile of the chat that posted it and will be available there after expiration
     :param is_visible_only_for_self: True, if the story is visible only for the current user
-    :param can_be_added_to_album: True, if the story can be added to an album using createStoryAlbum and addStoryAlbumStories
     :param can_be_deleted: True, if the story can be deleted
     :param can_be_edited: True, if the story can be edited
-    :param can_be_forwarded: True, if the story can be forwarded as a message or reposted as a story. Otherwise, screenshotting and saving of the story content must be also forbidden
+    :param can_be_forwarded: True, if the story can be forwarded as a message. Otherwise, screenshots and saving of the story content must be also forbidden
     :param can_be_replied: True, if the story can be replied in the chat with the user that posted the story
-    :param can_set_privacy_settings: True, if the story privacy settings can be changed
     :param can_toggle_is_posted_to_chat_page: True, if the story's is_posted_to_chat_page value can be changed
     :param can_get_statistics: True, if the story statistics are available through getStoryStatistics
     :param can_get_interactions: True, if interactions with the story can be received through getStoryInteractions
@@ -15507,7 +14522,6 @@ class Story(ObjectBase):
     :param content: Content of the story
     :param areas: Clickable areas to be shown on the story content
     :param caption: Caption of the story
-    :param album_ids: Identifiers of story albums to which the story is added; only for manageable stories
     """
 
     _type: "str" = field(default="story", init=False, repr=False)
@@ -15520,12 +14534,10 @@ class Story(ObjectBase):
     is_edited: "bool" = False
     is_posted_to_chat_page: "bool" = False
     is_visible_only_for_self: "bool" = False
-    can_be_added_to_album: "bool" = False
     can_be_deleted: "bool" = False
     can_be_edited: "bool" = False
     can_be_forwarded: "bool" = False
     can_be_replied: "bool" = False
-    can_set_privacy_settings: "bool" = False
     can_toggle_is_posted_to_chat_page: "bool" = False
     can_get_statistics: "bool" = False
     can_get_interactions: "bool" = False
@@ -15537,7 +14549,6 @@ class Story(ObjectBase):
     content: "StoryContent | None" = None
     areas: "list[StoryArea] | None" = None
     caption: "FormattedText | None" = None
-    album_ids: "list[int] | None" = None
 
 @dataclass
 class Stories(ObjectBase):
@@ -15570,34 +14581,6 @@ class FoundStories(ObjectBase):
     next_offset: "str" = ""
 
 @dataclass
-class StoryAlbum(ObjectBase):
-    """
-    Describes album of stories
-
-    :param id: Unique identifier of the album
-    :param name: Name of the album
-    :param photo_icon: Icon of the album; may be null if none
-    :param video_icon: Video icon of the album; may be null if none
-    """
-
-    _type: "str" = field(default="storyAlbum", init=False, repr=False)
-    id: "int" = 0
-    name: "str" = ""
-    photo_icon: "Photo | None" = None
-    video_icon: "Video | None" = None
-
-@dataclass
-class StoryAlbums(ObjectBase):
-    """
-    Represents a list of story albums
-
-    :param albums: List of story albums
-    """
-
-    _type: "str" = field(default="storyAlbums", init=False, repr=False)
-    albums: "list[StoryAlbum] | None" = None
-
-@dataclass
 class StoryFullId(ObjectBase):
     """
     Contains identifier of a story along with identifier of the chat that posted it
@@ -15618,14 +14601,12 @@ class StoryInfo(ObjectBase):
     :param story_id: Unique story identifier among stories of the chat
     :param date: Point in time (Unix timestamp) when the story was published
     :param is_for_close_friends: True, if the story is available only to close friends
-    :param is_live: True, if the story is a live story
     """
 
     _type: "str" = field(default="storyInfo", init=False, repr=False)
     story_id: "int" = 0
     date: "int" = 0
     is_for_close_friends: "bool" = False
-    is_live: "bool" = False
 
 @dataclass
 class ChatActiveStories(ObjectBase):
@@ -15635,8 +14616,6 @@ class ChatActiveStories(ObjectBase):
     :param chat_id: Identifier of the chat that posted the stories
     :param list_: Identifier of the story list in which the stories are shown; may be null if the stories aren't shown in a story list
     :param order: A parameter used to determine order of the stories in the story list; 0 if the stories doesn't need to be shown in the story list. Stories must be sorted by the pair (order, story_poster_chat_id) in descending order
-    :param can_be_archived: True, if the stories are shown in the main story list and can be archived; otherwise, the stories can be hidden from the main story list
-     only by calling removeTopChat with topChatCategoryUsers and the chat_id. Stories of the current user can't be archived nor hidden using removeTopChat
     :param max_read_story_id: Identifier of the last read active story
     :param stories: Basic information about the stories; use getStory to get full information about the stories. The stories are in chronological order (i.e., in order of increasing story identifiers)
     """
@@ -15645,7 +14624,6 @@ class ChatActiveStories(ObjectBase):
     chat_id: "int" = 0
     list_: "StoryList | None" = None
     order: "int" = 0
-    can_be_archived: "bool" = False
     max_read_story_id: "int" = 0
     stories: "list[StoryInfo] | None" = None
 
@@ -15832,7 +14810,7 @@ class BotMediaPreview(ObjectBase):
     Describes media previews of a bot
 
     :param date: Point in time (Unix timestamp) when the preview was added or changed last time
-    :param content: Content of the preview; may only be of the types storyContentPhoto, storyContentVideo, or storyContentUnsupported
+    :param content: Content of the preview
     """
 
     _type: "str" = field(default="botMediaPreview", init=False, repr=False)
@@ -16435,30 +15413,30 @@ class GroupCallVideoQualityFull(GroupCallVideoQuality):
     _type: "str" = field(default="groupCallVideoQualityFull", init=False, repr=False)
 
 @dataclass
-class GroupCallStream(ObjectBase):
+class VideoChatStream(ObjectBase):
     """
-    Describes an available stream in a video chat or a live story
+    Describes an available stream in a video chat
 
     :param channel_id: Identifier of an audio/video channel
     :param scale: Scale of segment durations in the stream. The duration is 1000/(2**scale) milliseconds
     :param time_offset: Point in time when the stream currently ends; Unix timestamp in milliseconds
     """
 
-    _type: "str" = field(default="groupCallStream", init=False, repr=False)
+    _type: "str" = field(default="videoChatStream", init=False, repr=False)
     channel_id: "int" = 0
     scale: "int" = 0
     time_offset: "int" = 0
 
 @dataclass
-class GroupCallStreams(ObjectBase):
+class VideoChatStreams(ObjectBase):
     """
-    Represents a list of group call streams
+    Represents a list of video chat streams
 
-    :param streams: A list of group call streams
+    :param streams: A list of video chat streams
     """
 
-    _type: "str" = field(default="groupCallStreams", init=False, repr=False)
-    streams: "list[GroupCallStream] | None" = None
+    _type: "str" = field(default="videoChatStreams", init=False, repr=False)
+    streams: "list[VideoChatStream] | None" = None
 
 @dataclass
 class RtmpUrl(ObjectBase):
@@ -16493,33 +15471,25 @@ class GroupCall(ObjectBase):
 
     :param id: Group call identifier
     :param title: Group call title; for video chats only
-    :param invite_link: Invite link for the group call; for group calls that aren't bound to a chat. For video chats call getVideoChatInviteLink to get the link.
-     For live stories in chats with username call getInternalLink with internalLinkTypeLiveStory
-    :param paid_message_star_count: The minimum number of Telegram Stars that must be paid by general participant for each sent message to the call; for live stories only
+    :param invite_link: Invite link for the group call; for group calls that aren't bound to a chat. For video chats call getVideoChatInviteLink to get the link
     :param scheduled_start_date: Point in time (Unix timestamp) when the group call is expected to be started by an administrator; 0 if it is already active or was ended; for video chats only
     :param enabled_start_notification: True, if the group call is scheduled and the current user will receive a notification when the group call starts; for video chats only
     :param is_active: True, if the call is active
     :param is_video_chat: True, if the call is bound to a chat
-    :param is_live_story: True, if the call is a live story of a chat
-    :param is_rtmp_stream: True, if the call is an RTMP stream instead of an ordinary video chat; for video chats and live stories only
+    :param is_rtmp_stream: True, if the call is an RTMP stream instead of an ordinary video chat; for video chats only
     :param is_joined: True, if the call is joined
     :param need_rejoin: True, if user was kicked from the call because of network loss and the call needs to be rejoined
     :param is_owned: True, if the user is the owner of the call and can end the call, change volume level of other users, or ban users there; for group calls that aren't bound to a chat
-    :param can_be_managed: True, if the current user can manage the group call; for video chats and live stories only
+    :param can_be_managed: True, if the current user can manage the group call; for video chats only
     :param participant_count: Number of participants in the group call
     :param has_hidden_listeners: True, if group call participants, which are muted, aren't returned in participant list; for video chats only
     :param loaded_all_participants: True, if all group call participants are loaded
-    :param message_sender_id: Message sender chosen to send messages to the group call; for live stories only; may be null if the call isn't a live story
     :param recent_speakers: At most 3 recently speaking users in the group call
     :param is_my_video_enabled: True, if the current user's video is enabled
     :param is_my_video_paused: True, if the current user's video is paused
     :param can_enable_video: True, if the current user can broadcast video or share screen
     :param mute_new_participants: True, if only group call administrators can unmute new participants; for video chats only
     :param can_toggle_mute_new_participants: True, if the current user can enable or disable mute_new_participants setting; for video chats only
-    :param can_send_messages: True, if the current user can send messages to the group call
-    :param are_messages_allowed: True, if sending of messages is allowed in the group call
-    :param can_toggle_are_messages_allowed: True, if the current user can enable or disable sending of messages in the group call
-    :param can_delete_messages: True, if the user can delete messages in the group call
     :param record_duration: Duration of the ongoing group call recording, in seconds; 0 if none. An updateGroupCall update is not triggered when value of this field changes, but the same recording goes on
     :param is_video_recorded: True, if a video file is being recorded for the call
     :param duration: Call duration, in seconds; for ended calls only
@@ -16529,12 +15499,10 @@ class GroupCall(ObjectBase):
     id: "int" = 0
     title: "str" = ""
     invite_link: "str" = ""
-    paid_message_star_count: "int" = 0
     scheduled_start_date: "int" = 0
     enabled_start_notification: "bool" = False
     is_active: "bool" = False
     is_video_chat: "bool" = False
-    is_live_story: "bool" = False
     is_rtmp_stream: "bool" = False
     is_joined: "bool" = False
     need_rejoin: "bool" = False
@@ -16543,17 +15511,12 @@ class GroupCall(ObjectBase):
     participant_count: "int" = 0
     has_hidden_listeners: "bool" = False
     loaded_all_participants: "bool" = False
-    message_sender_id: "MessageSender | None" = None
     recent_speakers: "list[GroupCallRecentSpeaker] | None" = None
     is_my_video_enabled: "bool" = False
     is_my_video_paused: "bool" = False
     can_enable_video: "bool" = False
     mute_new_participants: "bool" = False
     can_toggle_mute_new_participants: "bool" = False
-    can_send_messages: "bool" = False
-    are_messages_allowed: "bool" = False
-    can_toggle_are_messages_allowed: "bool" = False
-    can_delete_messages: "bool" = False
     record_duration: "int" = 0
     is_video_recorded: "bool" = False
     duration: "int" = 0
@@ -16656,52 +15619,6 @@ class GroupCallInfo(ObjectBase):
     _type: "str" = field(default="groupCallInfo", init=False, repr=False)
     group_call_id: "int" = 0
     join_payload: "str" = ""
-
-@dataclass
-class GroupCallMessage(ObjectBase):
-    """
-    Represents a message sent in a group call
-
-    :param message_id: Unique message identifier within the group call
-    :param sender_id: Identifier of the sender of the message
-    :param date: Point in time (Unix timestamp) when the message was sent
-    :param text: Text of the message. If empty, then the message is a paid reaction in a live story
-    :param paid_message_star_count: The number of Telegram Stars that were paid to send the message; for live stories only
-    :param is_from_owner: True, if the message is sent by the owner of the call and must be treated as a message of the maximum level; for live stories only
-    :param can_be_deleted: True, if the message can be deleted by the current user; for live stories only
-    """
-
-    _type: "str" = field(default="groupCallMessage", init=False, repr=False)
-    message_id: "int" = 0
-    sender_id: "MessageSender | None" = None
-    date: "int" = 0
-    text: "FormattedText | None" = None
-    paid_message_star_count: "int" = 0
-    is_from_owner: "bool" = False
-    can_be_deleted: "bool" = False
-
-@dataclass
-class GroupCallMessageLevel(ObjectBase):
-    """
-    Represents a level of features for a message sent in a live story group call
-
-    :param min_star_count: The minimum number of Telegram Stars required to get features of the level
-    :param pin_duration: The amount of time the message of this level will be pinned, in seconds
-    :param max_text_length: The maximum allowed length of the message text
-    :param max_custom_emoji_count: The maximum allowed number of custom emoji in the message text
-    :param first_color: The first color used to show the message text in the RGB format
-    :param second_color: The second color used to show the message text in the RGB format
-    :param background_color: Background color for the message the RGB format
-    """
-
-    _type: "str" = field(default="groupCallMessageLevel", init=False, repr=False)
-    min_star_count: "int" = 0
-    pin_duration: "int" = 0
-    max_text_length: "int" = 0
-    max_custom_emoji_count: "int" = 0
-    first_color: "int" = 0
-    second_color: "int" = 0
-    background_color: "int" = 0
 
 @dataclass
 class InviteGroupCallParticipantResult(ObjectBase):
@@ -17146,24 +16063,6 @@ class DiceStickersSlotMachine(DiceStickers):
     left_reel: "Sticker | None" = None
     center_reel: "Sticker | None" = None
     right_reel: "Sticker | None" = None
-
-@dataclass
-class ImportedContact(ObjectBase):
-    """
-    Describes a contact to import
-
-    :param phone_number: Phone number of the user
-    :param first_name: First name of the user; 1-64 characters
-    :param last_name: Last name of the user; 0-64 characters
-    :param note: Note to add about the user; 0-getOption("user_note_text_length_max") characters. Only Bold, Italic, Underline, Strikethrough, Spoiler, and CustomEmoji entities are allowed;
-     pass null to keep the current user's note
-    """
-
-    _type: "str" = field(default="importedContact", init=False, repr=False)
-    phone_number: "str" = ""
-    first_name: "str" = ""
-    last_name: "str" = ""
-    note: "FormattedText | None" = None
 
 @dataclass
 class ImportedContacts(ObjectBase):
@@ -19826,14 +18725,12 @@ class StorePaymentPurposeStars(StorePaymentPurpose):
     :param currency: ISO 4217 currency code of the payment currency
     :param amount: Paid amount, in the smallest units of the currency
     :param star_count: Number of bought Telegram Stars
-    :param chat_id: Identifier of the chat that is supposed to receive the Telegram Stars; pass 0 if none
     """
 
     _type: "str" = field(default="storePaymentPurposeStars", init=False, repr=False)
     currency: "str" = ""
     amount: "int" = 0
     star_count: "int" = 0
-    chat_id: "int" = 0
 
 @dataclass
 class StorePaymentPurposeGiftedStars(StorePaymentPurpose):
@@ -19963,14 +18860,12 @@ class TelegramPaymentPurposeStars(TelegramPaymentPurpose):
     :param currency: ISO 4217 currency code of the payment currency
     :param amount: Paid amount, in the smallest units of the currency
     :param star_count: Number of bought Telegram Stars
-    :param chat_id: Identifier of the chat that is supposed to receive the Telegram Stars; pass 0 if none
     """
 
     _type: "str" = field(default="telegramPaymentPurposeStars", init=False, repr=False)
     currency: "str" = ""
     amount: "int" = 0
     star_count: "int" = 0
-    chat_id: "int" = 0
 
 @dataclass
 class TelegramPaymentPurposeGiftedStars(TelegramPaymentPurpose):
@@ -20284,9 +19179,9 @@ class BackgroundTypeFill(BackgroundType):
 @dataclass
 class BackgroundTypeChatTheme(BackgroundType):
     """
-    A background from a chat theme based on an emoji; can be used only as a chat background in channels
+    A background from a chat theme; can be used only as a chat background in channels
 
-    :param theme_name: Name of the emoji chat theme
+    :param theme_name: Name of the chat theme
     """
 
     _type: "str" = field(default="backgroundTypeChatTheme", init=False, repr=False)
@@ -20335,109 +19230,19 @@ class InputBackgroundPrevious(InputBackground):
     message_id: "int" = 0
 
 @dataclass
-class EmojiChatTheme(ObjectBase):
+class ChatTheme(ObjectBase):
     """
-    Describes a chat theme based on an emoji
+    Describes a chat theme
 
     :param name: Theme name
     :param light_settings: Theme settings for a light chat theme
     :param dark_settings: Theme settings for a dark chat theme
     """
 
-    _type: "str" = field(default="emojiChatTheme", init=False, repr=False)
+    _type: "str" = field(default="chatTheme", init=False, repr=False)
     name: "str" = ""
     light_settings: "ThemeSettings | None" = None
     dark_settings: "ThemeSettings | None" = None
-
-@dataclass
-class GiftChatTheme(ObjectBase):
-    """
-    Describes a chat theme based on an upgraded gift
-
-    :param gift: The gift
-    :param light_settings: Theme settings for a light chat theme
-    :param dark_settings: Theme settings for a dark chat theme
-    """
-
-    _type: "str" = field(default="giftChatTheme", init=False, repr=False)
-    gift: "UpgradedGift | None" = None
-    light_settings: "ThemeSettings | None" = None
-    dark_settings: "ThemeSettings | None" = None
-
-@dataclass
-class GiftChatThemes(ObjectBase):
-    """
-    Contains a list of chat themes based on upgraded gifts
-
-    :param themes: A list of chat themes
-    :param next_offset: The offset for the next request. If empty, then there are no more results
-    """
-
-    _type: "str" = field(default="giftChatThemes", init=False, repr=False)
-    themes: "list[GiftChatTheme] | None" = None
-    next_offset: "str" = ""
-
-@dataclass
-class ChatTheme(ObjectBase):
-    """
-    Describes a chat theme
-
-    """
-
-    _type: "str" = field(default="ChatTheme", init=False, repr=False)
-
-@dataclass
-class ChatThemeEmoji(ChatTheme):
-    """
-    A chat theme based on an emoji
-
-    :param name: Name of the theme; full theme description is received through updateEmojiChatThemes
-    """
-
-    _type: "str" = field(default="chatThemeEmoji", init=False, repr=False)
-    name: "str" = ""
-
-@dataclass
-class ChatThemeGift(ChatTheme):
-    """
-    A chat theme based on an upgraded gift
-
-    :param gift_theme: The chat theme
-    """
-
-    _type: "str" = field(default="chatThemeGift", init=False, repr=False)
-    gift_theme: "GiftChatTheme | None" = None
-
-@dataclass
-class InputChatTheme(ObjectBase):
-    """
-    Describes a chat theme to set
-
-    """
-
-    _type: "str" = field(default="InputChatTheme", init=False, repr=False)
-
-@dataclass
-class InputChatThemeEmoji(InputChatTheme):
-    """
-    A theme based on an emoji
-
-    :param name: Name of the theme
-    """
-
-    _type: "str" = field(default="inputChatThemeEmoji", init=False, repr=False)
-    name: "str" = ""
-
-@dataclass
-class InputChatThemeGift(InputChatTheme):
-    """
-    A theme based on an upgraded gift
-
-    :param name: Name of the upgraded gift. A gift can be used only in one chat in a time. When the same gift is used in another chat, theme in the previous chat is reset to default
-    """
-
-    _type: "str" = field(default="inputChatThemeGift", init=False, repr=False)
-    name: "str" = ""
 
 @dataclass
 class TimeZone(ObjectBase):
@@ -20544,48 +19349,6 @@ class CanPostStoryResultMonthlyLimitExceeded(CanPostStoryResult):
 
     _type: "str" = field(default="canPostStoryResultMonthlyLimitExceeded", init=False, repr=False)
     retry_after: "int" = 0
-
-@dataclass
-class CanPostStoryResultLiveStoryIsActive(CanPostStoryResult):
-    """
-    The user or the chat has an active live story. The live story must be deleted first
-
-    :param story_id: Identifier of the active live story
-    """
-
-    _type: "str" = field(default="canPostStoryResultLiveStoryIsActive", init=False, repr=False)
-    story_id: "int" = 0
-
-@dataclass
-class StartLiveStoryResult(ObjectBase):
-    """
-    Represents result of starting a live story
-
-    """
-
-    _type: "str" = field(default="StartLiveStoryResult", init=False, repr=False)
-
-@dataclass
-class StartLiveStoryResultOk(StartLiveStoryResult):
-    """
-    The live story was successfully posted
-
-    :param story: The live story
-    """
-
-    _type: "str" = field(default="startLiveStoryResultOk", init=False, repr=False)
-    story: "Story | None" = None
-
-@dataclass
-class StartLiveStoryResultFail(StartLiveStoryResult):
-    """
-    The live story failed to post with an error to be handled
-
-    :param error_type: Type of the error; other error types may be returned as regular errors
-    """
-
-    _type: "str" = field(default="startLiveStoryResultFail", init=False, repr=False)
-    error_type: "CanPostStoryResult | None" = None
 
 @dataclass
 class CanTransferOwnershipResult(ObjectBase):
@@ -20881,11 +19644,9 @@ class PushMessageContentContactRegistered(PushMessageContent):
     """
     A contact has registered with Telegram
 
-    :param as_premium_account: True, if the user joined Telegram as a Telegram Premium account
     """
 
     _type: "str" = field(default="pushMessageContentContactRegistered", init=False, repr=False)
-    as_premium_account: "bool" = False
 
 @dataclass
 class PushMessageContentDocument(PushMessageContent):
@@ -21031,25 +19792,21 @@ class PushMessageContentGift(PushMessageContent):
     A message with a gift
 
     :param star_count: Number of Telegram Stars that sender paid for the gift
-    :param is_prepaid_upgrade: True, if the message is about prepaid upgrade of the gift by another user instead of actual receiving of a new gift
     """
 
     _type: "str" = field(default="pushMessageContentGift", init=False, repr=False)
     star_count: "int" = 0
-    is_prepaid_upgrade: "bool" = False
 
 @dataclass
 class PushMessageContentUpgradedGift(PushMessageContent):
     """
     A message with an upgraded gift
 
-    :param is_upgrade: True, if the gift was obtained by upgrading of a previously received gift; otherwise, if is_prepaid_upgrade == false, then this is a transferred or resold gift
-    :param is_prepaid_upgrade: True, if the message is about completion of prepaid upgrade of the gift instead of actual receiving of a new gift
+    :param is_upgrade: True, if the gift was obtained by upgrading of a previously received gift; otherwise, this is a transferred or resold gift
     """
 
     _type: "str" = field(default="pushMessageContentUpgradedGift", init=False, repr=False)
     is_upgrade: "bool" = False
-    is_prepaid_upgrade: "bool" = False
 
 @dataclass
 class PushMessageContentScreenshotTaken(PushMessageContent):
@@ -21246,11 +20003,11 @@ class PushMessageContentChatSetTheme(PushMessageContent):
     """
     A chat theme was edited
 
-    :param name: If non-empty, human-readable name of the new theme. Otherwise, the chat theme was reset to the default one
+    :param theme_name: If non-empty, name of a new theme, set for the chat. Otherwise, the chat theme was reset to the default one
     """
 
     _type: "str" = field(default="pushMessageContentChatSetTheme", init=False, repr=False)
-    name: "str" = ""
+    theme_name: "str" = ""
 
 @dataclass
 class PushMessageContentChatDeleteMember(PushMessageContent):
@@ -21304,15 +20061,6 @@ class PushMessageContentSuggestProfilePhoto(PushMessageContent):
     """
 
     _type: "str" = field(default="pushMessageContentSuggestProfilePhoto", init=False, repr=False)
-
-@dataclass
-class PushMessageContentSuggestBirthdate(PushMessageContent):
-    """
-    A birthdate was suggested to be set
-
-    """
-
-    _type: "str" = field(default="pushMessageContentSuggestBirthdate", init=False, repr=False)
 
 @dataclass
 class PushMessageContentProximityAlertTriggered(PushMessageContent):
@@ -21928,15 +20676,6 @@ class UserPrivacySettingShowBirthdate(UserPrivacySetting):
     """
 
     _type: "str" = field(default="userPrivacySettingShowBirthdate", init=False, repr=False)
-
-@dataclass
-class UserPrivacySettingShowProfileAudio(UserPrivacySetting):
-    """
-    A privacy setting for managing whether the user's profile audio files are visible
-
-    """
-
-    _type: "str" = field(default="userPrivacySettingShowProfileAudio", init=False, repr=False)
 
 @dataclass
 class UserPrivacySettingAllowChatInvites(UserPrivacySetting):
@@ -22772,17 +21511,6 @@ class InternalLinkTypeDefaultMessageAutoDeleteTimerSettings(InternalLinkType):
     _type: "str" = field(default="internalLinkTypeDefaultMessageAutoDeleteTimerSettings", init=False, repr=False)
 
 @dataclass
-class InternalLinkTypeDirectMessagesChat(InternalLinkType):
-    """
-    The link is a link to a channel direct messages chat by username of the channel. Call searchPublicChat with the given chat username to process the link. If the chat is found and is channel, open the direct messages chat of the channel
-
-    :param channel_username: Username of the channel
-    """
-
-    _type: "str" = field(default="internalLinkTypeDirectMessagesChat", init=False, repr=False)
-    channel_username: "str" = ""
-
-@dataclass
 class InternalLinkTypeEditProfileSettings(InternalLinkType):
     """
     The link is a link to the edit profile section of the application settings
@@ -22803,30 +21531,6 @@ class InternalLinkTypeGame(InternalLinkType):
     _type: "str" = field(default="internalLinkTypeGame", init=False, repr=False)
     bot_username: "str" = ""
     game_short_name: "str" = ""
-
-@dataclass
-class InternalLinkTypeGiftAuction(InternalLinkType):
-    """
-    The link is a link to a gift auction. Call getGiftAuctionState with the given auction identifier to process the link
-
-    :param auction_id: Unique identifier of the auction
-    """
-
-    _type: "str" = field(default="internalLinkTypeGiftAuction", init=False, repr=False)
-    auction_id: "str" = ""
-
-@dataclass
-class InternalLinkTypeGiftCollection(InternalLinkType):
-    """
-    The link is a link to a gift collection. Call searchPublicChat with the given username, then call getReceivedGifts with the received gift owner identifier and the given collection identifier, then show the collection if received
-
-    :param gift_owner_username: Username of the owner of the gift collection
-    :param collection_id: Gift collection identifier
-    """
-
-    _type: "str" = field(default="internalLinkTypeGiftCollection", init=False, repr=False)
-    gift_owner_username: "str" = ""
-    collection_id: "int" = 0
 
 @dataclass
 class InternalLinkTypeGroupCall(InternalLinkType):
@@ -22882,26 +21586,6 @@ class InternalLinkTypeLanguageSettings(InternalLinkType):
     """
 
     _type: "str" = field(default="internalLinkTypeLanguageSettings", init=False, repr=False)
-
-@dataclass
-class InternalLinkTypeLiveStory(InternalLinkType):
-    """
-    The link is a link to a live story. Call searchPublicChat with the given chat username, then getChatActiveStories to get active stories in the chat, then find a live story among active stories of the chat, and then joinLiveStory to join the live story
-
-    :param story_poster_username: Username of the poster of the story
-    """
-
-    _type: "str" = field(default="internalLinkTypeLiveStory", init=False, repr=False)
-    story_poster_username: "str" = ""
-
-@dataclass
-class InternalLinkTypeLoginEmailSettings(InternalLinkType):
-    """
-    The link is a link to the login email set up section of the application settings, forcing set up of the login email
-
-    """
-
-    _type: "str" = field(default="internalLinkTypeLoginEmailSettings", init=False, repr=False)
 
 @dataclass
 class InternalLinkTypeMainWebApp(InternalLinkType):
@@ -22984,15 +21668,6 @@ class InternalLinkTypePassportDataRequest(InternalLinkType):
     callback_url: "str" = ""
 
 @dataclass
-class InternalLinkTypePasswordSettings(InternalLinkType):
-    """
-    The link is a link to the password section of the application settings
-
-    """
-
-    _type: "str" = field(default="internalLinkTypePasswordSettings", init=False, repr=False)
-
-@dataclass
 class InternalLinkTypePhoneNumberConfirmation(InternalLinkType):
     """
     The link can be used to confirm ownership of a phone number to prevent account deletion. Call sendPhoneNumberCode with the given phone number and with phoneNumberCodeTypeConfirmOwnership with the given hash to process the link. If succeeded, call checkPhoneNumberCode to check entered by the user code, or resendPhoneNumberCode to resend it
@@ -23004,15 +21679,6 @@ class InternalLinkTypePhoneNumberConfirmation(InternalLinkType):
     _type: "str" = field(default="internalLinkTypePhoneNumberConfirmation", init=False, repr=False)
     hash: "str" = ""
     phone_number: "str" = ""
-
-@dataclass
-class InternalLinkTypePhoneNumberPrivacySettings(InternalLinkType):
-    """
-    The link is a link to the phone number privacy settings section of the application settings
-
-    """
-
-    _type: "str" = field(default="internalLinkTypePhoneNumberPrivacySettings", init=False, repr=False)
 
 @dataclass
 class InternalLinkTypePremiumFeatures(InternalLinkType):
@@ -23139,19 +21805,6 @@ class InternalLinkTypeStory(InternalLinkType):
     _type: "str" = field(default="internalLinkTypeStory", init=False, repr=False)
     story_poster_username: "str" = ""
     story_id: "int" = 0
-
-@dataclass
-class InternalLinkTypeStoryAlbum(InternalLinkType):
-    """
-    The link is a link to an album of stories. Call searchPublicChat with the given username, then call getStoryAlbumStories with the received chat identifier and the given story album identifier, then show the story album if received
-
-    :param story_album_owner_username: Username of the owner of the story album
-    :param story_album_id: Story album identifier
-    """
-
-    _type: "str" = field(default="internalLinkTypeStoryAlbum", init=False, repr=False)
-    story_album_owner_username: "str" = ""
-    story_album_id: "int" = 0
 
 @dataclass
 class InternalLinkTypeTheme(InternalLinkType):
@@ -23285,7 +21938,7 @@ class MessageLinkInfo(ObjectBase):
 
     :param is_public: True, if the link is a public link for a message or a forum topic in a chat
     :param chat_id: If found, identifier of the chat to which the link points, 0 otherwise
-    :param topic_id: Identifier of the specific topic in which the message must be opened, or a topic to open if the message is missing; may be null if none
+    :param message_thread_id: If found, identifier of the message thread in which to open the message, or a forum topic to open if the message is missing
     :param message: If found, the linked message; may be null
     :param media_timestamp: Timestamp from which the video/audio/video note/voice note/story playing must start, in seconds; 0 if not specified. The media can be in the message content or in its link preview
     :param for_album: True, if the whole media album to which the message belongs is linked
@@ -23294,7 +21947,7 @@ class MessageLinkInfo(ObjectBase):
     _type: "str" = field(default="messageLinkInfo", init=False, repr=False)
     is_public: "bool" = False
     chat_id: "int" = 0
-    topic_id: "MessageTopic | None" = None
+    message_thread_id: "int" = 0
     message: "Message | None" = None
     media_timestamp: "int" = 0
     for_album: "bool" = False
@@ -23944,21 +22597,6 @@ class ConnectionStateReady(ConnectionState):
     _type: "str" = field(default="connectionStateReady", init=False, repr=False)
 
 @dataclass
-class AgeVerificationParameters(ObjectBase):
-    """
-    Describes parameters for age verification of the current user
-
-    :param min_age: The minimum age required to view restricted content
-    :param verification_bot_username: Username of the bot which main Web App may be used to verify age of the user
-    :param country: Unique name for the country or region, which legislation required age verification. May be used to get the corresponding localization key
-    """
-
-    _type: "str" = field(default="ageVerificationParameters", init=False, repr=False)
-    min_age: "int" = 0
-    verification_bot_username: "str" = ""
-    country: "str" = ""
-
-@dataclass
 class TopChatCategory(ObjectBase):
     """
     Represents the categories of chats for which a list of frequently used chats can be retrieved
@@ -24297,17 +22935,6 @@ class SuggestedActionCustom(SuggestedAction):
     title: "FormattedText | None" = None
     description: "FormattedText | None" = None
     url: "str" = ""
-
-@dataclass
-class SuggestedActionSetLoginEmailAddress(SuggestedAction):
-    """
-    Suggests the user to add login email address. Call isLoginEmailAddressRequired, and then setLoginEmailAddress or checkLoginEmailAddressCode to change the login email address
-
-    :param can_be_hidden: True, if the suggested action can be hidden using hideSuggestedAction. Otherwise, the user must not be able to use the app without setting up the email address
-    """
-
-    _type: "str" = field(default="suggestedActionSetLoginEmailAddress", init=False, repr=False)
-    can_be_hidden: "bool" = False
 
 @dataclass
 class Count(ObjectBase):
@@ -24986,7 +23613,7 @@ class ChatRevenueTransactions(ObjectBase):
 @dataclass
 class StarRevenueStatus(ObjectBase):
     """
-    Contains information about Telegram Stars earned by a user or a chat
+    Contains information about Telegram Stars earned by a bot or a chat
 
     :param total_amount: Total amount of Telegram Stars earned
     :param current_amount: The amount of Telegram Stars that aren't withdrawn yet
@@ -25005,7 +23632,7 @@ class StarRevenueStatus(ObjectBase):
 @dataclass
 class StarRevenueStatistics(ObjectBase):
     """
-    A detailed statistics about Telegram Stars earned by a user or a chat
+    A detailed statistics about Telegram Stars earned by a bot or a chat
 
     :param revenue_by_day_graph: A graph containing amount of revenue in a given day
     :param status: Telegram Star revenue status
@@ -25015,38 +23642,6 @@ class StarRevenueStatistics(ObjectBase):
     _type: "str" = field(default="starRevenueStatistics", init=False, repr=False)
     revenue_by_day_graph: "StatisticalGraph | None" = None
     status: "StarRevenueStatus | None" = None
-    usd_rate: "float" = 0
-
-@dataclass
-class TonRevenueStatus(ObjectBase):
-    """
-    Contains information about Toncoins earned by the current user
-
-    :param total_amount: Total amount of Toncoins earned; in the smallest units of the cryptocurrency
-    :param balance_amount: Amount of Toncoins that aren't withdrawn yet; in the smallest units of the cryptocurrency
-    :param available_amount: Amount of Toncoins that are available for withdrawal; in the smallest units of the cryptocurrency
-    :param withdrawal_enabled: True, if Toncoins can be withdrawn
-    """
-
-    _type: "str" = field(default="tonRevenueStatus", init=False, repr=False)
-    total_amount: "int" = 0
-    balance_amount: "int" = 0
-    available_amount: "int" = 0
-    withdrawal_enabled: "bool" = False
-
-@dataclass
-class TonRevenueStatistics(ObjectBase):
-    """
-    A detailed statistics about Toncoins earned by the current user
-
-    :param revenue_by_day_graph: A graph containing amount of revenue in a given day
-    :param status: Amount of earned revenue
-    :param usd_rate: Current conversion rate of nanotoncoin to USD cents
-    """
-
-    _type: "str" = field(default="tonRevenueStatistics", init=False, repr=False)
-    revenue_by_day_graph: "StatisticalGraph | None" = None
-    status: "TonRevenueStatus | None" = None
     usd_rate: "float" = 0
 
 @dataclass
@@ -25487,7 +24082,6 @@ class UpdateChatAccentColors(Update):
     :param chat_id: Chat identifier
     :param accent_color_id: The new chat accent color identifier
     :param background_custom_emoji_id: The new identifier of a custom emoji to be shown on the reply header and link preview background; 0 if none
-    :param upgraded_gift_colors: Color scheme based on an upgraded gift to be used for the chat instead of accent_color_id and background_custom_emoji_id; may be null if none
     :param profile_accent_color_id: The new chat profile accent color identifier; -1 if none
     :param profile_background_custom_emoji_id: The new identifier of a custom emoji to be shown on the profile background; 0 if none
     """
@@ -25496,7 +24090,6 @@ class UpdateChatAccentColors(Update):
     chat_id: "int" = 0
     accent_color_id: "int" = 0
     background_custom_emoji_id: "int" = 0
-    upgraded_gift_colors: "UpgradedGiftColors | None" = None
     profile_accent_color_id: "int" = 0
     profile_background_custom_emoji_id: "int" = 0
 
@@ -25746,12 +24339,12 @@ class UpdateChatTheme(Update):
     The chat theme was changed
 
     :param chat_id: Chat identifier
-    :param theme: The new theme of the chat; may be null if theme was reset to default
+    :param theme_name: The new name of the chat theme; may be empty if theme was reset to default
     """
 
     _type: "str" = field(default="updateChatTheme", init=False, repr=False)
     chat_id: "int" = 0
-    theme: "ChatTheme | None" = None
+    theme_name: "str" = ""
 
 @dataclass
 class UpdateChatUnreadMentionCount(Update):
@@ -25951,7 +24544,7 @@ class UpdateTopicMessageCount(Update):
 
     :param chat_id: Identifier of the chat in topic of which the number of messages has changed
     :param topic_id: Identifier of the topic
-    :param message_count: Approximate number of messages in the topic
+    :param message_count: Approximate number of messages in the topics
     """
 
     _type: "str" = field(default="updateTopicMessageCount", init=False, repr=False)
@@ -26022,26 +24615,24 @@ class UpdateForumTopic(Update):
     Information about a topic in a forum chat was changed
 
     :param chat_id: Chat identifier
-    :param forum_topic_id: Forum topic identifier of the topic
+    :param message_thread_id: Message thread identifier of the topic
     :param is_pinned: True, if the topic is pinned in the topic list
     :param last_read_inbox_message_id: Identifier of the last read incoming message
     :param last_read_outbox_message_id: Identifier of the last read outgoing message
     :param unread_mention_count: Number of unread messages with a mention/reply in the topic
     :param unread_reaction_count: Number of messages with unread reactions in the topic
     :param notification_settings: Notification settings for the topic
-    :param draft_message: A draft of a message in the topic; may be null if none
     """
 
     _type: "str" = field(default="updateForumTopic", init=False, repr=False)
     chat_id: "int" = 0
-    forum_topic_id: "int" = 0
+    message_thread_id: "int" = 0
     is_pinned: "bool" = False
     last_read_inbox_message_id: "int" = 0
     last_read_outbox_message_id: "int" = 0
     unread_mention_count: "int" = 0
     unread_reaction_count: "int" = 0
     notification_settings: "ChatNotificationSettings | None" = None
-    draft_message: "DraftMessage | None" = None
 
 @dataclass
 class UpdateScopeNotificationSettings(Update):
@@ -26152,33 +24743,16 @@ class UpdateChatAction(Update):
     A message sender activity in the chat has changed
 
     :param chat_id: Chat identifier
-    :param topic_id: Identifier of the specific topic in which the action was performed; may be null if none
+    :param message_thread_id: If not 0, the message thread identifier in which the action was performed
     :param sender_id: Identifier of a message sender performing the action
     :param action: The action
     """
 
     _type: "str" = field(default="updateChatAction", init=False, repr=False)
     chat_id: "int" = 0
-    topic_id: "MessageTopic | None" = None
+    message_thread_id: "int" = 0
     sender_id: "MessageSender | None" = None
     action: "ChatAction | None" = None
-
-@dataclass
-class UpdatePendingTextMessage(Update):
-    """
-    A new pending text message was received in a chat with a bot. The message must be shown in the chat for at most getOption("pending_text_message_period") seconds, replace any other pending message with the same draft_id, and be deleted whenever any incoming message from the bot in the message thread is received
-
-    :param chat_id: Chat identifier
-    :param forum_topic_id: The forum topic identifier in which the message will be sent; 0 if none
-    :param draft_id: Unique identifier of the message draft within the message thread
-    :param text: Text of the pending message
-    """
-
-    _type: "str" = field(default="updatePendingTextMessage", init=False, repr=False)
-    chat_id: "int" = 0
-    forum_topic_id: "int" = 0
-    draft_id: "int" = 0
-    text: "FormattedText | None" = None
 
 @dataclass
 class UpdateUserStatus(Update):
@@ -26484,75 +25058,6 @@ class UpdateGroupCallVerificationState(Update):
     emojis: "list[str] | None" = None
 
 @dataclass
-class UpdateNewGroupCallMessage(Update):
-    """
-    A new message was received in a group call
-
-    :param group_call_id: Identifier of the group call
-    :param message: The message
-    """
-
-    _type: "str" = field(default="updateNewGroupCallMessage", init=False, repr=False)
-    group_call_id: "int" = 0
-    message: "GroupCallMessage | None" = None
-
-@dataclass
-class UpdateNewGroupCallPaidReaction(Update):
-    """
-    A new paid reaction was received in a live story group call
-
-    :param group_call_id: Identifier of the group call
-    :param sender_id: Identifier of the sender of the reaction
-    :param star_count: The number of Telegram Stars that were paid to send the reaction
-    """
-
-    _type: "str" = field(default="updateNewGroupCallPaidReaction", init=False, repr=False)
-    group_call_id: "int" = 0
-    sender_id: "MessageSender | None" = None
-    star_count: "int" = 0
-
-@dataclass
-class UpdateGroupCallMessageSendFailed(Update):
-    """
-    A group call message failed to send
-
-    :param group_call_id: Identifier of the group call
-    :param message_id: Message identifier
-    :param error: The cause of the message sending failure
-    """
-
-    _type: "str" = field(default="updateGroupCallMessageSendFailed", init=False, repr=False)
-    group_call_id: "int" = 0
-    message_id: "int" = 0
-    error: "Error | None" = None
-
-@dataclass
-class UpdateGroupCallMessagesDeleted(Update):
-    """
-    Some group call messages were deleted
-
-    :param group_call_id: Identifier of the group call
-    :param message_ids: Identifiers of the deleted messages
-    """
-
-    _type: "str" = field(default="updateGroupCallMessagesDeleted", init=False, repr=False)
-    group_call_id: "int" = 0
-    message_ids: "list[int] | None" = None
-
-@dataclass
-class UpdateLiveStoryTopDonors(Update):
-    """
-    The list of top donors in live story group call has changed
-
-    :param group_call_id: Identifier of the group call
-    :param donors: New list of live story donors
-    """
-
-    _type: "str" = field(default="updateLiveStoryTopDonors", init=False, repr=False)
-    group_call_id: "int" = 0
-    donors: "LiveStoryDonors | None" = None
-
-@dataclass
 class UpdateNewCallSignalingData(Update):
     """
     New call signaling data arrived
@@ -26564,28 +25069,6 @@ class UpdateNewCallSignalingData(Update):
     _type: "str" = field(default="updateNewCallSignalingData", init=False, repr=False)
     call_id: "int" = 0
     data: "bytes" = b""
-
-@dataclass
-class UpdateGiftAuctionState(Update):
-    """
-    State of a gift auction was updated
-
-    :param state: New state of the auction
-    """
-
-    _type: "str" = field(default="updateGiftAuctionState", init=False, repr=False)
-    state: "GiftAuctionState | None" = None
-
-@dataclass
-class UpdateActiveGiftAuctions(Update):
-    """
-    The list of auctions in which participate the current user has changed
-
-    :param states: New states of the auctions
-    """
-
-    _type: "str" = field(default="updateActiveGiftAuctions", init=False, repr=False)
-    states: "list[GiftAuctionState] | None" = None
 
 @dataclass
 class UpdateUserPrivacySettingRules(Update):
@@ -26726,17 +25209,6 @@ class UpdateStoryStealthMode(Update):
     cooldown_until_date: "int" = 0
 
 @dataclass
-class UpdateTrustedMiniAppBots(Update):
-    """
-    Lists of bots which Mini Apps must be allowed to read text from clipboard and must be opened without a warning
-
-    :param bot_user_ids: List of user identifiers of the bots; the corresponding users may not be sent using updateUser updates and may not be accessible
-    """
-
-    _type: "str" = field(default="updateTrustedMiniAppBots", init=False, repr=False)
-    bot_user_ids: "list[int] | None" = None
-
-@dataclass
 class UpdateOption(Update):
     """
     An option changed its value
@@ -26846,15 +25318,15 @@ class UpdateDefaultBackground(Update):
     background: "Background | None" = None
 
 @dataclass
-class UpdateEmojiChatThemes(Update):
+class UpdateChatThemes(Update):
     """
-    The list of available emoji chat themes has changed
+    The list of available chat themes has changed
 
-    :param chat_themes: The new list of emoji chat themes
+    :param chat_themes: The new list of chat themes
     """
 
-    _type: "str" = field(default="updateEmojiChatThemes", init=False, repr=False)
-    chat_themes: "list[EmojiChatTheme] | None" = None
+    _type: "str" = field(default="updateChatThemes", init=False, repr=False)
+    chat_themes: "list[ChatTheme] | None" = None
 
 @dataclass
 class UpdateAccentColors(Update):
@@ -26925,17 +25397,6 @@ class UpdateFreezeState(Update):
     freezing_date: "int" = 0
     deletion_date: "int" = 0
     appeal_link: "str" = ""
-
-@dataclass
-class UpdateAgeVerificationParameters(Update):
-    """
-    The parameters for age verification of the current user's account has changed
-
-    :param parameters: Parameters for the age verification; may be null if age verification isn't needed
-    """
-
-    _type: "str" = field(default="updateAgeVerificationParameters", init=False, repr=False)
-    parameters: "AgeVerificationParameters | None" = None
 
 @dataclass
 class UpdateTermsOfService(Update):
@@ -27091,7 +25552,7 @@ class UpdateChatRevenueAmount(Update):
 @dataclass
 class UpdateStarRevenueStatus(Update):
     """
-    The Telegram Star revenue earned by a user or a chat has changed. If Telegram Star transaction screen of the chat is opened, then getStarTransactions may be called to fetch new transactions
+    The Telegram Star revenue earned by a bot or a chat has changed. If Telegram Star transaction screen of the chat is opened, then getStarTransactions may be called to fetch new transactions
 
     :param owner_id: Identifier of the owner of the Telegram Stars
     :param status: New Telegram Star revenue status
@@ -27100,17 +25561,6 @@ class UpdateStarRevenueStatus(Update):
     _type: "str" = field(default="updateStarRevenueStatus", init=False, repr=False)
     owner_id: "MessageSender | None" = None
     status: "StarRevenueStatus | None" = None
-
-@dataclass
-class UpdateTonRevenueStatus(Update):
-    """
-    The Toncoin revenue earned by the current user has changed. If Toncoin transaction screen of the chat is opened, then getTonTransactions may be called to fetch new transactions
-
-    :param status: New Toncoin revenue status
-    """
-
-    _type: "str" = field(default="updateTonRevenueStatus", init=False, repr=False)
-    status: "TonRevenueStatus | None" = None
 
 @dataclass
 class UpdateSpeechRecognitionTrial(Update):
@@ -27128,17 +25578,6 @@ class UpdateSpeechRecognitionTrial(Update):
     weekly_count: "int" = 0
     left_count: "int" = 0
     next_reset_date: "int" = 0
-
-@dataclass
-class UpdateGroupCallMessageLevels(Update):
-    """
-    The levels of live story group call messages have changed
-
-    :param levels: New description of the levels in decreasing order of groupCallMessageLevel.min_star_count
-    """
-
-    _type: "str" = field(default="updateGroupCallMessageLevels", init=False, repr=False)
-    levels: "list[GroupCallMessageLevel] | None" = None
 
 @dataclass
 class UpdateDiceEmojis(Update):
@@ -28163,22 +26602,9 @@ class SetPassword(Function[PasswordState]):
 
 
 @dataclass
-class IsLoginEmailAddressRequired(Function[Ok]):
-    """
-    Checks whether the current user is required to set login email address
-
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="isLoginEmailAddressRequired", init=False, repr=False)
-
-
-
-@dataclass
 class SetLoginEmailAddress(Function[EmailAddressAuthenticationCodeInfo]):
     """
-    Changes the login email address of the user. The email address can be changed only if the current user already has login email and passwordState.login_email_address_pattern is non-empty, or the user received suggestedActionSetLoginEmailAddress and isLoginEmailAddressRequired succeeds. The change will not be applied until the new login email address is confirmed with checkLoginEmailAddressCode.
-     To use Apple ID/Google ID instead of an email address, call checkLoginEmailAddressCode directly
+    Changes the login email address of the user. The email address can be changed only if the current user already has login email and passwordState.login_email_address_pattern is non-empty. The change will not be applied until the new login email address is confirmed with checkLoginEmailAddressCode. To use Apple ID/Google ID instead of an email address, call checkLoginEmailAddressCode directly
 
     :param new_login_email_address: New login email address
     :return: :class:`EmailAddressAuthenticationCodeInfo`
@@ -29131,8 +27557,8 @@ class GetDirectMessagesChatTopicHistory(Function[Messages]):
     :param chat_id: Chat identifier of the channel direct messages chat
     :param topic_id: Identifier of the topic which messages will be fetched
     :param from_message_id: Identifier of the message starting from which messages must be fetched; use 0 to get results from the last message
-    :param offset: Specify 0 to get results from exactly the message from_message_id or a negative number from -99 to -1 to get additionally -offset newer messages
-    :param limit: The maximum number of messages to be returned; must be positive and can't be greater than 100. If the offset is negative, then the limit must be greater than or equal to -offset.
+    :param offset: Specify 0 to get results from exactly the message from_message_id or a negative offset up to 99 to get additionally some newer messages
+    :param limit: The maximum number of messages to be returned; must be positive and can't be greater than 100. If the offset is negative, the limit must be greater than or equal to -offset.
      For optimal performance, the number of returned messages is chosen by TDLib and can be smaller than the specified limit
     :return: :class:`Messages`
     """
@@ -29215,6 +27641,24 @@ class SetDirectMessagesChatTopicIsMarkedAsUnread(Function[Ok]):
     chat_id: "int" = 0
     topic_id: "int" = 0
     is_marked_as_unread: "bool" = False
+
+
+
+@dataclass
+class SetDirectMessagesChatTopicDraftMessage(Function[Ok]):
+    """
+    Changes the draft message in the topic in a channel direct messages chat administered by the current user
+
+    :param chat_id: Chat identifier
+    :param topic_id: Topic identifier
+    :param draft_message: New draft message; pass null to remove the draft. All files in draft message content must be of the type inputFileLocal. Media thumbnails and captions are ignored
+    :return: :class:`Ok`
+    """
+
+    _type: "str" = field(default="setDirectMessagesChatTopicDraftMessage", init=False, repr=False)
+    chat_id: "int" = 0
+    topic_id: "int" = 0
+    draft_message: "DraftMessage | None" = None
 
 
 
@@ -29307,8 +27751,8 @@ class GetSavedMessagesTopicHistory(Function[Messages]):
 
     :param saved_messages_topic_id: Identifier of Saved Messages topic which messages will be fetched
     :param from_message_id: Identifier of the message starting from which messages must be fetched; use 0 to get results from the last message
-    :param offset: Specify 0 to get results from exactly the message from_message_id or a negative number from -99 to -1 to get additionally -offset newer messages
-    :param limit: The maximum number of messages to be returned; must be positive and can't be greater than 100. If the offset is negative, then the limit must be greater than or equal to -offset.
+    :param offset: Specify 0 to get results from exactly the message from_message_id or a negative offset up to 99 to get additionally some newer messages
+    :param limit: The maximum number of messages to be returned; must be positive and can't be greater than 100. If the offset is negative, the limit must be greater than or equal to -offset.
      For optimal performance, the number of returned messages is chosen by TDLib and can be smaller than the specified limit
     :return: :class:`Messages`
     """
@@ -29424,8 +27868,8 @@ class GetChatHistory(Function[Messages]):
 
     :param chat_id: Chat identifier
     :param from_message_id: Identifier of the message starting from which history must be fetched; use 0 to get results from the last message
-    :param offset: Specify 0 to get results from exactly the message from_message_id or a negative number from -99 to -1 to get additionally -offset newer messages
-    :param limit: The maximum number of messages to be returned; must be positive and can't be greater than 100. If the offset is negative, then the limit must be greater than or equal to -offset.
+    :param offset: Specify 0 to get results from exactly the message from_message_id or a negative offset up to 99 to get additionally some newer messages
+    :param limit: The maximum number of messages to be returned; must be positive and can't be greater than 100. If the offset is negative, the limit must be greater than or equal to -offset.
      For optimal performance, the number of returned messages is chosen by TDLib and can be smaller than the specified limit
     :param only_local: Pass true to get only messages that are available without sending network requests
     :return: :class:`Messages`
@@ -29448,8 +27892,8 @@ class GetMessageThreadHistory(Function[Messages]):
     :param chat_id: Chat identifier
     :param message_id: Message identifier, which thread history needs to be returned
     :param from_message_id: Identifier of the message starting from which history must be fetched; use 0 to get results from the last message
-    :param offset: Specify 0 to get results from exactly the message from_message_id or a negative number from -99 to -1 to get additionally -offset newer messages
-    :param limit: The maximum number of messages to be returned; must be positive and can't be greater than 100. If the offset is negative, then the limit must be greater than or equal to -offset.
+    :param offset: Specify 0 to get results from exactly the message from_message_id or a negative offset up to 99 to get additionally some newer messages
+    :param limit: The maximum number of messages to be returned; must be positive and can't be greater than 100. If the offset is negative, the limit must be greater than or equal to -offset.
      For optimal performance, the number of returned messages is chosen by TDLib and can be smaller than the specified limit
     :return: :class:`Messages`
     """
@@ -29506,8 +27950,8 @@ class SearchChatMessages(Function[FoundChatMessages]):
     :param query: Query to search for
     :param sender_id: Identifier of the sender of messages to search for; pass null to search for messages from any sender. Not supported in secret chats
     :param from_message_id: Identifier of the message starting from which history must be fetched; use 0 to get results from the last message
-    :param offset: Specify 0 to get results from exactly the message from_message_id or a negative number to get the specified message and some newer messages
-    :param limit: The maximum number of messages to be returned; must be positive and can't be greater than 100. If the offset is negative, then the limit must be greater than -offset.
+    :param offset: Specify 0 to get results from exactly the message from_message_id or a negative offset to get the specified message and some newer messages
+    :param limit: The maximum number of messages to be returned; must be positive and can't be greater than 100. If the offset is negative, the limit must be greater than -offset.
      For optimal performance, the number of returned messages is chosen by TDLib and can be smaller than the specified limit
     :param filter: Additional filter for messages to search; pass null to search for all messages
     :return: :class:`FoundChatMessages`
@@ -29585,8 +28029,8 @@ class SearchSavedMessages(Function[FoundChatMessages]):
     :param tag: Tag to search for; pass null to return all suitable messages
     :param query: Query to search for
     :param from_message_id: Identifier of the message starting from which messages must be fetched; use 0 to get results from the last message
-    :param offset: Specify 0 to get results from exactly the message from_message_id or a negative number to get the specified message and some newer messages
-    :param limit: The maximum number of messages to be returned; must be positive and can't be greater than 100. If the offset is negative, then the limit must be greater than -offset.
+    :param offset: Specify 0 to get results from exactly the message from_message_id or a negative offset to get the specified message and some newer messages
+    :param limit: The maximum number of messages to be returned; must be positive and can't be greater than 100. If the offset is negative, the limit must be greater than -offset.
      For optimal performance, the number of returned messages is chosen by TDLib and can be smaller than the specified limit
     :return: :class:`FoundChatMessages`
     """
@@ -29632,40 +28076,6 @@ class SearchOutgoingDocumentMessages(Function[FoundMessages]):
     _type: "str" = field(default="searchOutgoingDocumentMessages", init=False, repr=False)
     query: "str" = ""
     limit: "int" = 0
-
-
-
-@dataclass
-class GetPublicPostSearchLimits(Function[PublicPostSearchLimits]):
-    """
-    Checks public post search limits without actually performing the search
-
-    :param query: Query that will be searched for
-    :return: :class:`PublicPostSearchLimits`
-    """
-
-    _type: "str" = field(default="getPublicPostSearchLimits", init=False, repr=False)
-    query: "str" = ""
-
-
-
-@dataclass
-class SearchPublicPosts(Function[FoundPublicPosts]):
-    """
-    Searches for public channel posts using the given query. For optimal performance, the number of returned messages is chosen by TDLib and can be smaller than the specified limit
-
-    :param query: Query to search for
-    :param offset: Offset of the first entry to return as received from the previous request; use empty string to get the first chunk of results
-    :param limit: The maximum number of messages to be returned; up to 100. For optimal performance, the number of returned messages is chosen by TDLib and can be smaller than the specified limit
-    :param star_count: The amount of Telegram Stars the user agreed to pay for the search; pass 0 for free searches
-    :return: :class:`FoundPublicPosts`
-    """
-
-    _type: "str" = field(default="searchPublicPosts", init=False, repr=False)
-    query: "str" = ""
-    offset: "str" = ""
-    limit: "int" = 0
-    star_count: "int" = 0
 
 
 
@@ -29863,7 +28273,7 @@ class GetChatMessageCalendar(Function[MessageCalendar]):
     Returns information about the next messages of the specified type in the chat split by days. Returns the results in reverse chronological order. Can return partial result for the last returned day. Behavior of this method depends on the value of the option "utc_time_offset"
 
     :param chat_id: Identifier of the chat in which to return information about messages
-    :param topic_id: Pass topic identifier to get the result only in specific topic; pass null to get the result in all topics; forum topics and message threads aren't supported
+    :param topic_id: Pass topic identifier to get the result only in specific topic; pass null to get the result in all topics; forum topics aren't supported
     :param filter: Filter for message content. Filters searchMessagesFilterEmpty, searchMessagesFilterMention, searchMessagesFilterUnreadMention, and searchMessagesFilterUnreadReaction are unsupported in this function
     :param from_message_id: The message identifier from which to return information about messages; use 0 to get results from the last message
     :return: :class:`MessageCalendar`
@@ -29883,7 +28293,7 @@ class GetChatMessageCount(Function[Count]):
     Returns approximate number of messages of the specified type in the chat or its topic
 
     :param chat_id: Identifier of the chat in which to count messages
-    :param topic_id: Pass topic identifier to get number of messages only in specific topic; pass null to get number of messages in all topics; message threads aren't supported
+    :param topic_id: Pass topic identifier to get number of messages only in specific topic; pass null to get number of messages in all topics
     :param filter: Filter for message content; searchMessagesFilterEmpty is unsupported in this function
     :param return_local: Pass true to get the number of messages without sending network requests, or -1 if the number of messages is unknown locally
     :return: :class:`Count`
@@ -29903,7 +28313,7 @@ class GetChatMessagePosition(Function[Count]):
     Returns approximate 1-based position of a message among messages, which can be found by the specified filter in the chat and topic. Cannot be used in secret chats
 
     :param chat_id: Identifier of the chat in which to find message position
-    :param topic_id: Pass topic identifier to get position among messages only in specific topic; pass null to get position among all chat messages; message threads aren't supported
+    :param topic_id: Pass topic identifier to get position among messages only in specific topic; pass null to get position among all chat messages
     :param filter: Filter for message content; searchMessagesFilterEmpty, searchMessagesFilterUnreadMention, searchMessagesFilterUnreadReaction, and searchMessagesFilterFailedToSend are unsupported in this function
     :param message_id: Message identifier
     :return: :class:`Count`
@@ -30299,7 +28709,7 @@ class SendMessage(Function[Message]):
     Sends a message. Returns the sent message
 
     :param chat_id: Target chat
-    :param topic_id: Topic in which the message will be sent; pass null if none
+    :param message_thread_id: If not 0, the message thread identifier in which the message will be sent
     :param reply_to: Information about the message or story to be replied; pass null if none
     :param options: Options to be used to send the message; pass null to use default options
     :param reply_markup: Markup for replying to the message; pass null if none; for bots only
@@ -30309,7 +28719,7 @@ class SendMessage(Function[Message]):
 
     _type: "str" = field(default="sendMessage", init=False, repr=False)
     chat_id: "int" = 0
-    topic_id: "MessageTopic | None" = None
+    message_thread_id: "int" = 0
     reply_to: "InputMessageReplyTo | None" = None
     options: "MessageSendOptions | None" = None
     reply_markup: "ReplyMarkup | None" = None
@@ -30323,7 +28733,7 @@ class SendMessageAlbum(Function[Messages]):
     Sends 2-10 messages grouped together into an album. Currently, only audio, document, photo and video messages can be grouped into an album. Documents and audio files can be only grouped in an album with messages of the same type. Returns sent messages
 
     :param chat_id: Target chat
-    :param topic_id: Topic in which the messages will be sent; pass null if none
+    :param message_thread_id: If not 0, the message thread identifier in which the messages will be sent
     :param reply_to: Information about the message or story to be replied; pass null if none
     :param options: Options to be used to send the messages; pass null to use default options
     :param input_message_contents: Contents of messages to be sent. At most 10 messages can be added to an album. All messages must have the same value of show_caption_above_media
@@ -30332,7 +28742,7 @@ class SendMessageAlbum(Function[Messages]):
 
     _type: "str" = field(default="sendMessageAlbum", init=False, repr=False)
     chat_id: "int" = 0
-    topic_id: "MessageTopic | None" = None
+    message_thread_id: "int" = 0
     reply_to: "InputMessageReplyTo | None" = None
     options: "MessageSendOptions | None" = None
     input_message_contents: "list[InputMessageContent] | None" = None
@@ -30363,7 +28773,7 @@ class SendInlineQueryResultMessage(Function[Message]):
     Sends the result of an inline query as a message. Returns the sent message. Always clears a chat draft message
 
     :param chat_id: Target chat
-    :param topic_id: Topic in which the message will be sent; pass null if none
+    :param message_thread_id: If not 0, the message thread identifier in which the message will be sent
     :param reply_to: Information about the message or story to be replied; pass null if none
     :param options: Options to be used to send the message; pass null to use default options
     :param query_id: Identifier of the inline query
@@ -30374,7 +28784,7 @@ class SendInlineQueryResultMessage(Function[Message]):
 
     _type: "str" = field(default="sendInlineQueryResultMessage", init=False, repr=False)
     chat_id: "int" = 0
-    topic_id: "MessageTopic | None" = None
+    message_thread_id: "int" = 0
     reply_to: "InputMessageReplyTo | None" = None
     options: "MessageSendOptions | None" = None
     query_id: "int" = 0
@@ -30389,7 +28799,7 @@ class ForwardMessages(Function[Messages]):
     Forwards previously sent messages. Returns the forwarded messages in the same order as the message identifiers passed in message_ids. If a message can't be forwarded, null will be returned instead of the message
 
     :param chat_id: Identifier of the chat to which to forward messages
-    :param topic_id: Topic in which the messages will be forwarded; message threads aren't supported; pass null if none
+    :param message_thread_id: If not 0, the message thread identifier in which the message will be sent; for forum threads only
     :param from_chat_id: Identifier of the chat from which to forward messages
     :param message_ids: Identifiers of the messages to forward. Message identifiers must be in a strictly increasing order. At most 100 messages can be forwarded simultaneously. A message can be forwarded only if messageProperties.can_be_forwarded
     :param options: Options to be used to send the messages; pass null to use default options
@@ -30401,7 +28811,7 @@ class ForwardMessages(Function[Messages]):
 
     _type: "str" = field(default="forwardMessages", init=False, repr=False)
     chat_id: "int" = 0
-    topic_id: "MessageTopic | None" = None
+    message_thread_id: "int" = 0
     from_chat_id: "int" = 0
     message_ids: "list[int] | None" = None
     options: "MessageSendOptions | None" = None
@@ -31413,11 +29823,10 @@ class GetForumTopicDefaultIcons(Function[Stickers]):
 @dataclass
 class CreateForumTopic(Function[ForumTopicInfo]):
     """
-    Creates a topic in a forum supergroup chat or a chat with a bot with topics; requires can_manage_topics administrator or can_create_topics member right in the supergroup
+    Creates a topic in a forum supergroup chat; requires can_manage_topics administrator or can_create_topics member right in the supergroup
 
     :param chat_id: Identifier of the chat
     :param name: Name of the topic; 1-128 characters
-    :param is_name_implicit: Pass true if the name of the topic wasn't entered explicitly; for chats with bots only
     :param icon: Icon of the topic. Icon color must be one of 0x6FB9F0, 0xFFD67E, 0xCB86DB, 0x8EEE98, 0xFF93B2, or 0xFB6F5F. Telegram Premium users can use any custom emoji as topic icon, other users can use only a custom emoji returned by getForumTopicDefaultIcons
     :return: :class:`ForumTopicInfo`
     """
@@ -31425,7 +29834,6 @@ class CreateForumTopic(Function[ForumTopicInfo]):
     _type: "str" = field(default="createForumTopic", init=False, repr=False)
     chat_id: "int" = 0
     name: "str" = ""
-    is_name_implicit: "bool" = False
     icon: "ForumTopicIcon | None" = None
 
 
@@ -31433,10 +29841,10 @@ class CreateForumTopic(Function[ForumTopicInfo]):
 @dataclass
 class EditForumTopic(Function[Ok]):
     """
-    Edits title and icon of a topic in a forum supergroup chat or a chat with a bot with topics; for supergroup chats requires can_manage_topics administrator right unless the user is creator of the topic
+    Edits title and icon of a topic in a forum supergroup chat; requires can_manage_topics administrator right in the supergroup unless the user is creator of the topic
 
     :param chat_id: Identifier of the chat
-    :param forum_topic_id: Forum topic identifier
+    :param message_thread_id: Message thread identifier of the forum topic
     :param name: New name of the topic; 0-128 characters. If empty, the previous topic name is kept
     :param edit_icon_custom_emoji: Pass true to edit the icon of the topic. Icon of the General topic can't be edited
     :param icon_custom_emoji_id: Identifier of the new custom emoji for topic icon; pass 0 to remove the custom emoji. Ignored if edit_icon_custom_emoji is false. Telegram Premium users can use any custom emoji, other users can use only a custom emoji returned by getForumTopicDefaultIcons
@@ -31445,7 +29853,7 @@ class EditForumTopic(Function[Ok]):
 
     _type: "str" = field(default="editForumTopic", init=False, repr=False)
     chat_id: "int" = 0
-    forum_topic_id: "int" = 0
+    message_thread_id: "int" = 0
     name: "str" = ""
     edit_icon_custom_emoji: "bool" = False
     icon_custom_emoji_id: "int" = 0
@@ -31455,68 +29863,45 @@ class EditForumTopic(Function[Ok]):
 @dataclass
 class GetForumTopic(Function[ForumTopic]):
     """
-    Returns information about a topic in a forum supergroup chat or a chat with a bot with topics
+    Returns information about a forum topic
 
     :param chat_id: Identifier of the chat
-    :param forum_topic_id: Forum topic identifier
+    :param message_thread_id: Message thread identifier of the forum topic
     :return: :class:`ForumTopic`
     """
 
     _type: "str" = field(default="getForumTopic", init=False, repr=False)
     chat_id: "int" = 0
-    forum_topic_id: "int" = 0
-
-
-
-@dataclass
-class GetForumTopicHistory(Function[Messages]):
-    """
-    Returns messages in a topic in a forum supergroup chat or a chat with a bot with topics. The messages are returned in reverse chronological order (i.e., in order of decreasing message_id). For optimal performance, the number of returned messages is chosen by TDLib
-
-    :param chat_id: Chat identifier
-    :param forum_topic_id: Forum topic identifier
-    :param from_message_id: Identifier of the message starting from which history must be fetched; use 0 to get results from the last message
-    :param offset: Specify 0 to get results from exactly the message from_message_id or a negative number from -99 to -1 to get additionally -offset newer messages
-    :param limit: The maximum number of messages to be returned; must be positive and can't be greater than 100. If the offset is negative, then the limit must be greater than or equal to -offset.
-     For optimal performance, the number of returned messages is chosen by TDLib and can be smaller than the specified limit
-    :return: :class:`Messages`
-    """
-
-    _type: "str" = field(default="getForumTopicHistory", init=False, repr=False)
-    chat_id: "int" = 0
-    forum_topic_id: "int" = 0
-    from_message_id: "int" = 0
-    offset: "int" = 0
-    limit: "int" = 0
+    message_thread_id: "int" = 0
 
 
 
 @dataclass
 class GetForumTopicLink(Function[MessageLink]):
     """
-    Returns an HTTPS link to a topic in a forum supergroup chat. This is an offline method
+    Returns an HTTPS link to a topic in a forum chat. This is an offline method
 
     :param chat_id: Identifier of the chat
-    :param forum_topic_id: Forum topic identifier
+    :param message_thread_id: Message thread identifier of the forum topic
     :return: :class:`MessageLink`
     """
 
     _type: "str" = field(default="getForumTopicLink", init=False, repr=False)
     chat_id: "int" = 0
-    forum_topic_id: "int" = 0
+    message_thread_id: "int" = 0
 
 
 
 @dataclass
 class GetForumTopics(Function[ForumTopics]):
     """
-    Returns found forum topics in a forum supergroup chat or a chat with a bot with topics. This is a temporary method for getting information about topic list from the server
+    Returns found forum topics in a forum chat. This is a temporary method for getting information about topic list from the server
 
-    :param chat_id: Identifier of the chat
+    :param chat_id: Identifier of the forum chat
     :param query: Query to search for in the forum topic's name
     :param offset_date: The date starting from which the results need to be fetched. Use 0 or any date in the future to get results from the last topic
     :param offset_message_id: The message identifier of the last message in the last found topic, or 0 for the first request
-    :param offset_forum_topic_id: The forum topic identifier of the last found topic, or 0 for the first request
+    :param offset_message_thread_id: The message thread identifier of the last found topic, or 0 for the first request
     :param limit: The maximum number of forum topics to be returned; up to 100. For optimal performance, the number of returned forum topics is chosen by TDLib and can be smaller than the specified limit
     :return: :class:`ForumTopics`
     """
@@ -31526,7 +29911,7 @@ class GetForumTopics(Function[ForumTopics]):
     query: "str" = ""
     offset_date: "int" = 0
     offset_message_id: "int" = 0
-    offset_forum_topic_id: "int" = 0
+    offset_message_thread_id: "int" = 0
     limit: "int" = 0
 
 
@@ -31534,17 +29919,17 @@ class GetForumTopics(Function[ForumTopics]):
 @dataclass
 class SetForumTopicNotificationSettings(Function[Ok]):
     """
-    Changes the notification settings of a forum topic in a forum supergroup chat or a chat with a bot with topics
+    Changes the notification settings of a forum topic
 
     :param chat_id: Chat identifier
-    :param forum_topic_id: Forum topic identifier
+    :param message_thread_id: Message thread identifier of the forum topic
     :param notification_settings: New notification settings for the forum topic. If the topic is muted for more than 366 days, it is considered to be muted forever
     :return: :class:`Ok`
     """
 
     _type: "str" = field(default="setForumTopicNotificationSettings", init=False, repr=False)
     chat_id: "int" = 0
-    forum_topic_id: "int" = 0
+    message_thread_id: "int" = 0
     notification_settings: "ChatNotificationSettings | None" = None
 
 
@@ -31555,14 +29940,14 @@ class ToggleForumTopicIsClosed(Function[Ok]):
     Toggles whether a topic is closed in a forum supergroup chat; requires can_manage_topics administrator right in the supergroup unless the user is creator of the topic
 
     :param chat_id: Identifier of the chat
-    :param forum_topic_id: Forum topic identifier
+    :param message_thread_id: Message thread identifier of the forum topic
     :param is_closed: Pass true to close the topic; pass false to reopen it
     :return: :class:`Ok`
     """
 
     _type: "str" = field(default="toggleForumTopicIsClosed", init=False, repr=False)
     chat_id: "int" = 0
-    forum_topic_id: "int" = 0
+    message_thread_id: "int" = 0
     is_closed: "bool" = False
 
 
@@ -31586,17 +29971,17 @@ class ToggleGeneralForumTopicIsHidden(Function[Ok]):
 @dataclass
 class ToggleForumTopicIsPinned(Function[Ok]):
     """
-    Changes the pinned state of a topic in a forum supergroup chat or a chat with a bot with topics; requires can_manage_topics administrator right in the supergroup. There can be up to getOption("pinned_forum_topic_count_max") pinned forum topics
+    Changes the pinned state of a forum topic; requires can_manage_topics administrator right in the supergroup. There can be up to getOption("pinned_forum_topic_count_max") pinned forum topics
 
     :param chat_id: Chat identifier
-    :param forum_topic_id: Forum topic identifier
+    :param message_thread_id: Message thread identifier of the forum topic
     :param is_pinned: Pass true to pin the topic; pass false to unpin it
     :return: :class:`Ok`
     """
 
     _type: "str" = field(default="toggleForumTopicIsPinned", init=False, repr=False)
     chat_id: "int" = 0
-    forum_topic_id: "int" = 0
+    message_thread_id: "int" = 0
     is_pinned: "bool" = False
 
 
@@ -31604,80 +29989,32 @@ class ToggleForumTopicIsPinned(Function[Ok]):
 @dataclass
 class SetPinnedForumTopics(Function[Ok]):
     """
-    Changes the order of pinned topics in a forum supergroup chat or a chat with a bot with topics; requires can_manage_topics administrator right in the supergroup
+    Changes the order of pinned forum topics; requires can_manage_topics administrator right in the supergroup
 
     :param chat_id: Chat identifier
-    :param forum_topic_ids: The new list of identifiers of the pinned forum topics
+    :param message_thread_ids: The new list of pinned forum topics
     :return: :class:`Ok`
     """
 
     _type: "str" = field(default="setPinnedForumTopics", init=False, repr=False)
     chat_id: "int" = 0
-    forum_topic_ids: "list[int] | None" = None
+    message_thread_ids: "list[int] | None" = None
 
 
 
 @dataclass
 class DeleteForumTopic(Function[Ok]):
     """
-    Deletes all messages from a topic in a forum supergroup chat or a chat with a bot with topics; requires can_delete_messages administrator right in the supergroup unless the user is creator of the topic, the topic has no messages from other users and has at most 11 messages
+    Deletes all messages in a forum topic; requires can_delete_messages administrator right in the supergroup unless the user is creator of the topic, the topic has no messages from other users and has at most 11 messages
 
     :param chat_id: Identifier of the chat
-    :param forum_topic_id: Forum topic identifier
+    :param message_thread_id: Message thread identifier of the forum topic
     :return: :class:`Ok`
     """
 
     _type: "str" = field(default="deleteForumTopic", init=False, repr=False)
     chat_id: "int" = 0
-    forum_topic_id: "int" = 0
-
-
-
-@dataclass
-class ReadAllForumTopicMentions(Function[Ok]):
-    """
-    Marks all mentions in a topic in a forum supergroup chat as read
-
-    :param chat_id: Chat identifier
-    :param forum_topic_id: Forum topic identifier in which mentions are marked as read
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="readAllForumTopicMentions", init=False, repr=False)
-    chat_id: "int" = 0
-    forum_topic_id: "int" = 0
-
-
-
-@dataclass
-class ReadAllForumTopicReactions(Function[Ok]):
-    """
-    Marks all reactions in a topic in a forum supergroup chat or a chat with a bot with topics as read
-
-    :param chat_id: Chat identifier
-    :param forum_topic_id: Forum topic identifier in which reactions are marked as read
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="readAllForumTopicReactions", init=False, repr=False)
-    chat_id: "int" = 0
-    forum_topic_id: "int" = 0
-
-
-
-@dataclass
-class UnpinAllForumTopicMessages(Function[Ok]):
-    """
-    Removes all pinned messages from a topic in a forum supergroup chat or a chat with a bot with topics; requires can_pin_messages member right in the supergroup
-
-    :param chat_id: Identifier of the chat
-    :param forum_topic_id: Forum topic identifier in which messages will be unpinned
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="unpinAllForumTopicMessages", init=False, repr=False)
-    chat_id: "int" = 0
-    forum_topic_id: "int" = 0
+    message_thread_id: "int" = 0
 
 
 
@@ -32589,7 +30926,8 @@ class OpenWebApp(Function[WebAppInfo]):
     :param chat_id: Identifier of the chat in which the Web App is opened. The Web App can't be opened in secret chats
     :param bot_user_id: Identifier of the bot, providing the Web App. If the bot is restricted for the current user, then show an error instead of calling the method
     :param url: The URL from an inlineKeyboardButtonTypeWebApp button, a botMenuButton button, an internalLinkTypeAttachmentMenuBot link, or an empty string otherwise
-    :param topic_id: Topic in which the message will be sent; pass null if none
+    :param message_thread_id: If not 0, the message thread identifier to which the message will be sent
+    :param direct_messages_chat_topic_id: If not 0, unique identifier of the topic of channel direct messages chat to which the message will be sent
     :param reply_to: Information about the message or story to be replied in the message sent by the Web App; pass null if none
     :param parameters: Parameters to use to open the Web App
     :return: :class:`WebAppInfo`
@@ -32599,7 +30937,8 @@ class OpenWebApp(Function[WebAppInfo]):
     chat_id: "int" = 0
     bot_user_id: "int" = 0
     url: "str" = ""
-    topic_id: "MessageTopic | None" = None
+    message_thread_id: "int" = 0
+    direct_messages_chat_topic_id: "int" = 0
     reply_to: "InputMessageReplyTo | None" = None
     parameters: "WebAppOpenParameters | None" = None
 
@@ -32810,7 +31149,7 @@ class GetInlineGameHighScores(Function[GameHighScores]):
 @dataclass
 class DeleteChatReplyMarkup(Function[Ok]):
     """
-    Deletes the default reply markup from a chat. Must be called after a one-time keyboard or a replyMarkupForceReply reply markup has been used or dismissed
+    Deletes the default reply markup from a chat. Must be called after a one-time keyboard or a replyMarkupForceReply reply markup has been used. An updateChatReplyMarkup update will be sent if the reply markup is changed
 
     :param chat_id: Chat identifier
     :param message_id: The message identifier of the used keyboard
@@ -32829,7 +31168,7 @@ class SendChatAction(Function[Ok]):
     Sends a notification about user activity in a chat
 
     :param chat_id: Chat identifier
-    :param topic_id: Identifier of the topic in which the action is performed
+    :param message_thread_id: If not 0, the message thread identifier in which the action was performed
     :param business_connection_id: Unique identifier of business connection on behalf of which to send the request; for bots only
     :param action: The action description; pass null to cancel the currently active action
     :return: :class:`Ok`
@@ -32837,29 +31176,9 @@ class SendChatAction(Function[Ok]):
 
     _type: "str" = field(default="sendChatAction", init=False, repr=False)
     chat_id: "int" = 0
-    topic_id: "MessageTopic | None" = None
+    message_thread_id: "int" = 0
     business_connection_id: "str" = ""
     action: "ChatAction | None" = None
-
-
-
-@dataclass
-class SendTextMessageDraft(Function[Ok]):
-    """
-    Sends a draft for a being generated text message; for bots only
-
-    :param chat_id: Chat identifier
-    :param forum_topic_id: The forum topic identifier in which the message will be sent; pass 0 if none
-    :param draft_id: Unique identifier of the draft
-    :param text: Draft text of the message
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="sendTextMessageDraft", init=False, repr=False)
-    chat_id: "int" = 0
-    forum_topic_id: "int" = 0
-    draft_id: "int" = 0
-    text: "FormattedText | None" = None
 
 
 
@@ -33018,9 +31337,25 @@ class ReadAllChatMentions(Function[Ok]):
 
 
 @dataclass
+class ReadAllMessageThreadMentions(Function[Ok]):
+    """
+    Marks all mentions in a forum topic as read
+
+    :param chat_id: Chat identifier
+    :param message_thread_id: Message thread identifier in which mentions are marked as read
+    :return: :class:`Ok`
+    """
+
+    _type: "str" = field(default="readAllMessageThreadMentions", init=False, repr=False)
+    chat_id: "int" = 0
+    message_thread_id: "int" = 0
+
+
+
+@dataclass
 class ReadAllChatReactions(Function[Ok]):
     """
-    Marks all reactions in a chat as read
+    Marks all reactions in a chat or a forum topic as read
 
     :param chat_id: Chat identifier
     :return: :class:`Ok`
@@ -33028,6 +31363,22 @@ class ReadAllChatReactions(Function[Ok]):
 
     _type: "str" = field(default="readAllChatReactions", init=False, repr=False)
     chat_id: "int" = 0
+
+
+
+@dataclass
+class ReadAllMessageThreadReactions(Function[Ok]):
+    """
+    Marks all reactions in a forum topic as read
+
+    :param chat_id: Chat identifier
+    :param message_thread_id: Message thread identifier in which reactions are marked as read
+    :return: :class:`Ok`
+    """
+
+    _type: "str" = field(default="readAllMessageThreadReactions", init=False, repr=False)
+    chat_id: "int" = 0
+    message_thread_id: "int" = 0
 
 
 
@@ -33665,51 +32016,35 @@ class DeleteChatBackground(Function[Ok]):
 
 
 @dataclass
-class GetGiftChatThemes(Function[GiftChatThemes]):
-    """
-    Returns available to the current user gift chat themes
-
-    :param offset: Offset of the first entry to return as received from the previous request; use empty string to get the first chunk of results
-    :param limit: The maximum number of chat themes to return
-    :return: :class:`GiftChatThemes`
-    """
-
-    _type: "str" = field(default="getGiftChatThemes", init=False, repr=False)
-    offset: "str" = ""
-    limit: "int" = 0
-
-
-
-@dataclass
 class SetChatTheme(Function[Ok]):
     """
     Changes the chat theme. Supported only in private and secret chats
 
     :param chat_id: Chat identifier
-    :param theme: New chat theme; pass null to return the default theme
+    :param theme_name: Name of the new chat theme; pass an empty string to return the default theme
     :return: :class:`Ok`
     """
 
     _type: "str" = field(default="setChatTheme", init=False, repr=False)
     chat_id: "int" = 0
-    theme: "InputChatTheme | None" = None
+    theme_name: "str" = ""
 
 
 
 @dataclass
 class SetChatDraftMessage(Function[Ok]):
     """
-    Changes the draft message in a chat or a topic
+    Changes the draft message in a chat
 
     :param chat_id: Chat identifier
-    :param topic_id: Topic in which the draft will be changed; pass null to change the draft for the chat itself
+    :param message_thread_id: If not 0, the message thread identifier in which the draft was changed
     :param draft_message: New draft message; pass null to remove the draft. All files in draft message content must be of the type inputFileLocal. Media thumbnails and captions are ignored
     :return: :class:`Ok`
     """
 
     _type: "str" = field(default="setChatDraftMessage", init=False, repr=False)
     chat_id: "int" = 0
-    topic_id: "MessageTopic | None" = None
+    message_thread_id: "int" = 0
     draft_message: "DraftMessage | None" = None
 
 
@@ -33913,10 +32248,10 @@ class SetChatLocation(Function[Ok]):
 @dataclass
 class SetChatSlowModeDelay(Function[Ok]):
     """
-    Changes the slow mode delay of a chat. Available only for supergroups; requires can_restrict_members administrator right
+    Changes the slow mode delay of a chat. Available only for supergroups; requires can_restrict_members right
 
     :param chat_id: Chat identifier
-    :param slow_mode_delay: New slow mode delay for the chat, in seconds; must be one of 0, 5, 10, 30, 60, 300, 900, 3600
+    :param slow_mode_delay: New slow mode delay for the chat, in seconds; must be one of 0, 10, 30, 60, 300, 900, 3600
     :return: :class:`Ok`
     """
 
@@ -33973,6 +32308,22 @@ class UnpinAllChatMessages(Function[Ok]):
 
     _type: "str" = field(default="unpinAllChatMessages", init=False, repr=False)
     chat_id: "int" = 0
+
+
+
+@dataclass
+class UnpinAllMessageThreadMessages(Function[Ok]):
+    """
+    Removes all pinned messages from a forum topic; requires can_pin_messages member right in the supergroup
+
+    :param chat_id: Identifier of the chat
+    :param message_thread_id: Message thread identifier in which messages will be unpinned
+    :return: :class:`Ok`
+    """
+
+    _type: "str" = field(default="unpinAllMessageThreadMessages", init=False, repr=False)
+    chat_id: "int" = 0
+    message_thread_id: "int" = 0
 
 
 
@@ -34392,7 +32743,7 @@ class GetChatsToPostStories(Function[Chats]):
 @dataclass
 class CanPostStory(Function[CanPostStoryResult]):
     """
-    Checks whether the current user can post a story on behalf of a chat; requires can_post_stories administrator right for supergroup and channel chats
+    Checks whether the current user can post a story on behalf of a chat; requires can_post_stories right for supergroup and channel chats
 
     :param chat_id: Chat identifier. Pass Saved Messages chat identifier when posting a story on behalf of the current user
     :return: :class:`CanPostStoryResult`
@@ -34406,14 +32757,13 @@ class CanPostStory(Function[CanPostStoryResult]):
 @dataclass
 class PostStory(Function[Story]):
     """
-    Posts a new story on behalf of a chat; requires can_post_stories administrator right for supergroup and channel chats. Returns a temporary story
+    Posts a new story on behalf of a chat; requires can_post_stories right for supergroup and channel chats. Returns a temporary story
 
     :param chat_id: Identifier of the chat that will post the story. Pass Saved Messages chat identifier when posting a story on behalf of the current user
     :param content: Content of the story
     :param areas: Clickable rectangle areas to be shown on the story media; pass null if none
     :param caption: Story caption; pass null to use an empty caption; 0-getOption("story_caption_length_max") characters; can have entities only if getOption("can_use_text_entities_in_story_caption")
     :param privacy_settings: The privacy settings for the story; ignored for stories posted on behalf of supergroup and channel chats
-    :param album_ids: Identifiers of story albums to which the story will be added upon posting. An album can have up to getOption("story_album_size_max") stories
     :param active_period: Period after which the story is moved to archive, in seconds; must be one of 6 * 3600, 12 * 3600, 86400, or 2 * 86400 for Telegram Premium users, and 86400 otherwise
     :param from_story_full_id: Full identifier of the original story, which content was used to create the story; pass null if the story isn't repost of another story
     :param is_posted_to_chat_page: Pass true to keep the story accessible after expiration
@@ -34427,35 +32777,10 @@ class PostStory(Function[Story]):
     areas: "InputStoryAreas | None" = None
     caption: "FormattedText | None" = None
     privacy_settings: "StoryPrivacySettings | None" = None
-    album_ids: "list[int] | None" = None
     active_period: "int" = 0
     from_story_full_id: "StoryFullId | None" = None
     is_posted_to_chat_page: "bool" = False
     protect_content: "bool" = False
-
-
-
-@dataclass
-class StartLiveStory(Function[StartLiveStoryResult]):
-    """
-    Starts a new live story on behalf of a chat; requires can_post_stories administrator right for channel chats
-
-    :param chat_id: Identifier of the chat that will start the live story. Pass Saved Messages chat identifier when starting a live story on behalf of the current user, or a channel chat identifier
-    :param privacy_settings: The privacy settings for the story; ignored for stories posted on behalf of channel chats
-    :param protect_content: Pass true if the content of the story must be protected from screenshotting
-    :param is_rtmp_stream: Pass true to create an RTMP stream instead of an ordinary group call
-    :param enable_messages: Pass true to allow viewers of the story to send messages
-    :param paid_message_star_count: The minimum number of Telegram Stars that must be paid by viewers for each sent message to the call; 0-getOption("paid_group_call_message_star_count_max")
-    :return: :class:`StartLiveStoryResult`
-    """
-
-    _type: "str" = field(default="startLiveStory", init=False, repr=False)
-    chat_id: "int" = 0
-    privacy_settings: "StoryPrivacySettings | None" = None
-    protect_content: "bool" = False
-    is_rtmp_stream: "bool" = False
-    enable_messages: "bool" = False
-    paid_message_star_count: "int" = 0
 
 
 
@@ -34502,7 +32827,7 @@ class EditStoryCover(Function[Ok]):
 @dataclass
 class SetStoryPrivacySettings(Function[Ok]):
     """
-    Changes privacy settings of a story. The method can be called only for stories posted on behalf of the current user and if story.can_set_privacy_settings == true
+    Changes privacy settings of a story. The method can be called only for stories posted on behalf of the current user and if story.can_be_edited == true
 
     :param story_id: Identifier of the story
     :param privacy_settings: The new privacy settings for the story
@@ -34627,7 +32952,7 @@ class GetChatPostedToChatPageStories(Function[Stories]):
 @dataclass
 class GetChatArchivedStories(Function[Stories]):
     """
-    Returns the list of all stories posted by the given chat; requires can_edit_stories administrator right in the chat. The stories are returned in reverse chronological order (i.e., in order of decreasing story_id). For optimal performance, the number of returned stories is chosen by TDLib
+    Returns the list of all stories posted by the given chat; requires can_edit_stories right in the chat. The stories are returned in reverse chronological order (i.e., in order of decreasing story_id). For optimal performance, the number of returned stories is chosen by TDLib
 
     :param chat_id: Chat identifier
     :param from_story_id: Identifier of the story starting from which stories must be returned; use 0 to get results from the last story
@@ -34646,7 +32971,7 @@ class GetChatArchivedStories(Function[Stories]):
 @dataclass
 class SetChatPinnedStories(Function[Ok]):
     """
-    Changes the list of pinned stories on a chat page; requires can_edit_stories administrator right in the chat
+    Changes the list of pinned stories on a chat page; requires can_edit_stories right in the chat
 
     :param chat_id: Identifier of the chat that posted the stories
     :param story_ids: New list of pinned stories. All stories must be posted to the chat page first. There can be up to getOption("pinned_story_count_max") pinned stories on a chat page
@@ -34708,7 +33033,7 @@ class GetStoryAvailableReactions(Function[AvailableReactions]):
 @dataclass
 class SetStoryReaction(Function[Ok]):
     """
-    Changes chosen reaction on a story that has already been sent; not supported for live stories
+    Changes chosen reaction on a story that has already been sent
 
     :param story_poster_chat_id: The identifier of the poster of the story
     :param story_id: The identifier of the story
@@ -34824,163 +33149,6 @@ class GetStoryPublicForwards(Function[PublicForwards]):
     story_id: "int" = 0
     offset: "str" = ""
     limit: "int" = 0
-
-
-
-@dataclass
-class GetChatStoryAlbums(Function[StoryAlbums]):
-    """
-    Returns the list of story albums owned by the given chat
-
-    :param chat_id: Chat identifier
-    :return: :class:`StoryAlbums`
-    """
-
-    _type: "str" = field(default="getChatStoryAlbums", init=False, repr=False)
-    chat_id: "int" = 0
-
-
-
-@dataclass
-class GetStoryAlbumStories(Function[Stories]):
-    """
-    Returns the list of stories added to the given story album. For optimal performance, the number of returned stories is chosen by TDLib
-
-    :param chat_id: Chat identifier
-    :param story_album_id: Story album identifier
-    :param offset: Offset of the first entry to return; use 0 to get results from the first album story
-    :param limit: The maximum number of stories to be returned. For optimal performance, the number of returned stories is chosen by TDLib and can be smaller than the specified limit
-    :return: :class:`Stories`
-    """
-
-    _type: "str" = field(default="getStoryAlbumStories", init=False, repr=False)
-    chat_id: "int" = 0
-    story_album_id: "int" = 0
-    offset: "int" = 0
-    limit: "int" = 0
-
-
-
-@dataclass
-class CreateStoryAlbum(Function[StoryAlbum]):
-    """
-    Creates an album of stories; requires can_edit_stories administrator right for supergroup and channel chats
-
-    :param story_poster_chat_id: Identifier of the chat that posted the stories
-    :param name: Name of the album; 1-12 characters
-    :param story_ids: Identifiers of stories to add to the album; 0-getOption("story_album_size_max") identifiers
-    :return: :class:`StoryAlbum`
-    """
-
-    _type: "str" = field(default="createStoryAlbum", init=False, repr=False)
-    story_poster_chat_id: "int" = 0
-    name: "str" = ""
-    story_ids: "list[int] | None" = None
-
-
-
-@dataclass
-class ReorderStoryAlbums(Function[Ok]):
-    """
-    Changes order of story albums. If the albums are owned by a supergroup or a channel chat, then requires can_edit_stories administrator right in the chat
-
-    :param chat_id: Identifier of the chat that owns the stories
-    :param story_album_ids: New order of story albums
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="reorderStoryAlbums", init=False, repr=False)
-    chat_id: "int" = 0
-    story_album_ids: "list[int] | None" = None
-
-
-
-@dataclass
-class DeleteStoryAlbum(Function[Ok]):
-    """
-    Deletes a story album. If the album is owned by a supergroup or a channel chat, then requires can_edit_stories administrator right in the chat
-
-    :param chat_id: Identifier of the chat that owns the stories
-    :param story_album_id: Identifier of the story album
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="deleteStoryAlbum", init=False, repr=False)
-    chat_id: "int" = 0
-    story_album_id: "int" = 0
-
-
-
-@dataclass
-class SetStoryAlbumName(Function[StoryAlbum]):
-    """
-    Changes name of an album of stories. If the album is owned by a supergroup or a channel chat, then requires can_edit_stories administrator right in the chat. Returns the changed album
-
-    :param chat_id: Identifier of the chat that owns the stories
-    :param story_album_id: Identifier of the story album
-    :param name: New name of the album; 1-12 characters
-    :return: :class:`StoryAlbum`
-    """
-
-    _type: "str" = field(default="setStoryAlbumName", init=False, repr=False)
-    chat_id: "int" = 0
-    story_album_id: "int" = 0
-    name: "str" = ""
-
-
-
-@dataclass
-class AddStoryAlbumStories(Function[StoryAlbum]):
-    """
-    Adds stories to the beginning of a previously created story album. If the album is owned by a supergroup or a channel chat, then requires can_edit_stories administrator right in the chat. Returns the changed album
-
-    :param chat_id: Identifier of the chat that owns the stories
-    :param story_album_id: Identifier of the story album
-    :param story_ids: Identifier of the stories to add to the album; 1-getOption("story_album_size_max") identifiers.
-     If after addition the album has more than getOption("story_album_size_max") stories, then the last one are removed from the album
-    :return: :class:`StoryAlbum`
-    """
-
-    _type: "str" = field(default="addStoryAlbumStories", init=False, repr=False)
-    chat_id: "int" = 0
-    story_album_id: "int" = 0
-    story_ids: "list[int] | None" = None
-
-
-
-@dataclass
-class RemoveStoryAlbumStories(Function[StoryAlbum]):
-    """
-    Removes stories from an album. If the album is owned by a supergroup or a channel chat, then requires can_edit_stories administrator right in the chat. Returns the changed album
-
-    :param chat_id: Identifier of the chat that owns the stories
-    :param story_album_id: Identifier of the story album
-    :param story_ids: Identifier of the stories to remove from the album
-    :return: :class:`StoryAlbum`
-    """
-
-    _type: "str" = field(default="removeStoryAlbumStories", init=False, repr=False)
-    chat_id: "int" = 0
-    story_album_id: "int" = 0
-    story_ids: "list[int] | None" = None
-
-
-
-@dataclass
-class ReorderStoryAlbumStories(Function[StoryAlbum]):
-    """
-    Changes order of stories in an album. If the album is owned by a supergroup or a channel chat, then requires can_edit_stories administrator right in the chat. Returns the changed album
-
-    :param chat_id: Identifier of the chat that owns the stories
-    :param story_album_id: Identifier of the story album
-    :param story_ids: Identifier of the stories to move to the beginning of the album. All other stories are placed in the current order after the specified stories
-    :return: :class:`StoryAlbum`
-    """
-
-    _type: "str" = field(default="reorderStoryAlbumStories", init=False, repr=False)
-    chat_id: "int" = 0
-    story_album_id: "int" = 0
-    story_ids: "list[int] | None" = None
 
 
 
@@ -35919,8 +34087,7 @@ class ApproveSuggestedPost(Function[Ok]):
 
     :param chat_id: Chat identifier of the channel direct messages chat
     :param message_id: Identifier of the message with the suggested post. Use messageProperties.can_be_approved to check whether the suggested post can be approved
-    :param send_date: Point in time (Unix timestamp) when the post is expected to be published; pass 0 if the date has already been chosen. If specified,
-     then the date must be in the future, but at most getOption("suggested_post_send_delay_max") seconds in the future
+    :param send_date: Point in time (Unix timestamp) when the post is expected to be published; pass 0 if the date has already been chosen
     :return: :class:`Ok`
     """
 
@@ -35952,7 +34119,7 @@ class DeclineSuggestedPost(Function[Ok]):
 @dataclass
 class AddOffer(Function[Message]):
     """
-    Sends a suggested post based on a previously sent message in a channel direct messages chat. Can be also used to suggest price or time change for an existing suggested post. Returns the sent message
+    Sent a suggested post based on a previously sent message in a channel direct messages chat. Can be also used to suggest price or time change for an existing suggested post. Returns the sent message
 
     :param chat_id: Identifier of the channel direct messages chat
     :param message_id: Identifier of the message in the chat which will be sent as suggested post. Use messageProperties.can_add_offer to check whether an offer can be added
@@ -36114,7 +34281,7 @@ class SetVideoChatDefaultParticipant(Function[Ok]):
     Changes default participant identifier, on whose behalf a video chat in the chat will be joined
 
     :param chat_id: Chat identifier
-    :param default_participant_id: Default group call participant identifier to join the video chats in the chat
+    :param default_participant_id: Default group call participant identifier to join the video chats
     :return: :class:`Ok`
     """
 
@@ -36187,34 +34354,6 @@ class ReplaceVideoChatRtmpUrl(Function[RtmpUrl]):
 
 
 @dataclass
-class GetLiveStoryRtmpUrl(Function[RtmpUrl]):
-    """
-    Returns RTMP URL for streaming to a live story; requires can_post_stories administrator right for channel chats
-
-    :param chat_id: Chat identifier
-    :return: :class:`RtmpUrl`
-    """
-
-    _type: "str" = field(default="getLiveStoryRtmpUrl", init=False, repr=False)
-    chat_id: "int" = 0
-
-
-
-@dataclass
-class ReplaceLiveStoryRtmpUrl(Function[RtmpUrl]):
-    """
-    Replaces the current RTMP URL for streaming to a live story; requires owner privileges for channel chats
-
-    :param chat_id: Chat identifier
-    :return: :class:`RtmpUrl`
-    """
-
-    _type: "str" = field(default="replaceLiveStoryRtmpUrl", init=False, repr=False)
-    chat_id: "int" = 0
-
-
-
-@dataclass
 class GetGroupCall(Function[GroupCall]):
     """
     Returns information about a group call
@@ -36261,7 +34400,7 @@ class ToggleVideoChatEnabledStartNotification(Function[Ok]):
 @dataclass
 class JoinGroupCall(Function[GroupCallInfo]):
     """
-    Joins a regular group call that is not bound to a chat
+    Joins a group call that is not bound to a chat
 
     :param input_group_call: The group call to join
     :param join_parameters: Parameters to join the call
@@ -36280,7 +34419,7 @@ class JoinVideoChat(Function[Text]):
     Joins an active video chat. Returns join response payload for tgcalls
 
     :param group_call_id: Group call identifier
-    :param participant_id: Identifier of a group call participant, which will be used to join the call; pass null to join as self
+    :param participant_id: Identifier of a group call participant, which will be used to join the call; pass null to join as self; video chats only
     :param join_parameters: Parameters to join the call
     :param invite_hash: Invite hash as received from internalLinkTypeVideoChat
     :return: :class:`Text`
@@ -36295,25 +34434,9 @@ class JoinVideoChat(Function[Text]):
 
 
 @dataclass
-class JoinLiveStory(Function[Text]):
-    """
-    Joins a group call of an active live story. Returns join response payload for tgcalls
-
-    :param group_call_id: Group call identifier
-    :param join_parameters: Parameters to join the call
-    :return: :class:`Text`
-    """
-
-    _type: "str" = field(default="joinLiveStory", init=False, repr=False)
-    group_call_id: "int" = 0
-    join_parameters: "GroupCallJoinParameters | None" = None
-
-
-
-@dataclass
 class StartGroupCallScreenSharing(Function[Text]):
     """
-    Starts screen sharing in a joined group call; not supported in live stories. Returns join response payload for tgcalls
+    Starts screen sharing in a joined group call. Returns join response payload for tgcalls
 
     :param group_call_id: Group call identifier
     :param audio_source_id: Screen sharing audio channel synchronization source identifier; received from tgcalls
@@ -36331,7 +34454,7 @@ class StartGroupCallScreenSharing(Function[Text]):
 @dataclass
 class ToggleGroupCallScreenSharingIsPaused(Function[Ok]):
     """
-    Pauses or unpauses screen sharing in a joined group call; not supported in live stories
+    Pauses or unpauses screen sharing in a joined group call
 
     :param group_call_id: Group call identifier
     :param is_paused: Pass true to pause screen sharing; pass false to unpause it
@@ -36347,7 +34470,7 @@ class ToggleGroupCallScreenSharingIsPaused(Function[Ok]):
 @dataclass
 class EndGroupCallScreenSharing(Function[Ok]):
     """
-    Ends screen sharing in a joined group call; not supported in live stories
+    Ends screen sharing in a joined group call
 
     :param group_call_id: Group call identifier
     :return: :class:`Ok`
@@ -36387,180 +34510,6 @@ class ToggleVideoChatMuteNewParticipants(Function[Ok]):
     _type: "str" = field(default="toggleVideoChatMuteNewParticipants", init=False, repr=False)
     group_call_id: "int" = 0
     mute_new_participants: "bool" = False
-
-
-
-@dataclass
-class ToggleGroupCallAreMessagesAllowed(Function[Ok]):
-    """
-    Toggles whether participants of a group call can send messages there. Requires groupCall.can_toggle_are_messages_allowed right
-
-    :param group_call_id: Group call identifier
-    :param are_messages_allowed: New value of the are_messages_allowed setting
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="toggleGroupCallAreMessagesAllowed", init=False, repr=False)
-    group_call_id: "int" = 0
-    are_messages_allowed: "bool" = False
-
-
-
-@dataclass
-class GetLiveStoryStreamer(Function[GroupCallParticipant]):
-    """
-    Returns information about the user or the chat that streams to a live story; for live stories that aren't an RTMP stream only
-
-    :param group_call_id: Group call identifier
-    :return: :class:`GroupCallParticipant`
-    """
-
-    _type: "str" = field(default="getLiveStoryStreamer", init=False, repr=False)
-    group_call_id: "int" = 0
-
-
-
-@dataclass
-class GetLiveStoryAvailableMessageSenders(Function[ChatMessageSenders]):
-    """
-    Returns the list of message sender identifiers, on whose behalf messages can be sent to a live story
-
-    :param group_call_id: Group call identifier
-    :return: :class:`ChatMessageSenders`
-    """
-
-    _type: "str" = field(default="getLiveStoryAvailableMessageSenders", init=False, repr=False)
-    group_call_id: "int" = 0
-
-
-
-@dataclass
-class SetLiveStoryMessageSender(Function[Ok]):
-    """
-    Selects a message sender to send messages in a live story call
-
-    :param group_call_id: Group call identifier
-    :param message_sender_id: New message sender for the group call
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="setLiveStoryMessageSender", init=False, repr=False)
-    group_call_id: "int" = 0
-    message_sender_id: "MessageSender | None" = None
-
-
-
-@dataclass
-class SendGroupCallMessage(Function[Ok]):
-    """
-    Sends a message to other participants of a group call. Requires groupCall.can_send_messages right
-
-    :param group_call_id: Group call identifier
-    :param text: Text of the message to send; 1-getOption("group_call_message_text_length_max") characters for non-live-stories; see updateGroupCallMessageLevels for live story restrictions,
-     which depends on paid_message_star_count. Can't contain line feeds for live stories
-    :param paid_message_star_count: The number of Telegram Stars the user agreed to pay to send the message; for live stories only; 0-getOption("paid_group_call_message_star_count_max").
-     Must be 0 for messages sent to live stories posted by the current user
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="sendGroupCallMessage", init=False, repr=False)
-    group_call_id: "int" = 0
-    text: "FormattedText | None" = None
-    paid_message_star_count: "int" = 0
-
-
-
-@dataclass
-class AddPendingLiveStoryReaction(Function[Ok]):
-    """
-    Adds pending paid reaction in a live story group call. Can't be used in live stories posted by the current user. Call commitPendingLiveStoryReactions or removePendingLiveStoryReactions to actually send all pending reactions when the undo timer is over or abort the sending
-
-    :param group_call_id: Group call identifier
-    :param star_count: Number of Telegram Stars to be used for the reaction. The total number of pending paid reactions must not exceed getOption("paid_group_call_message_star_count_max")
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="addPendingLiveStoryReaction", init=False, repr=False)
-    group_call_id: "int" = 0
-    star_count: "int" = 0
-
-
-
-@dataclass
-class CommitPendingLiveStoryReactions(Function[Ok]):
-    """
-    Applies all pending paid reactions in a live story group call
-
-    :param group_call_id: Group call identifier
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="commitPendingLiveStoryReactions", init=False, repr=False)
-    group_call_id: "int" = 0
-
-
-
-@dataclass
-class RemovePendingLiveStoryReactions(Function[Ok]):
-    """
-    Removes all pending paid reactions in a live story group call
-
-    :param group_call_id: Group call identifier
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="removePendingLiveStoryReactions", init=False, repr=False)
-    group_call_id: "int" = 0
-
-
-
-@dataclass
-class DeleteGroupCallMessages(Function[Ok]):
-    """
-    Deletes messages in a group call; for live story calls only. Requires groupCallMessage.can_be_deleted right
-
-    :param group_call_id: Group call identifier
-    :param message_ids: Identifiers of the messages to be deleted
-    :param report_spam: Pass true to report the messages as spam
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="deleteGroupCallMessages", init=False, repr=False)
-    group_call_id: "int" = 0
-    message_ids: "list[int] | None" = None
-    report_spam: "bool" = False
-
-
-
-@dataclass
-class DeleteGroupCallMessagesBySender(Function[Ok]):
-    """
-    Deletes all messages sent by the specified message sender in a group call; for live story calls only. Requires groupCall.can_delete_messages right
-
-    :param group_call_id: Group call identifier
-    :param sender_id: Identifier of the sender of messages to delete
-    :param report_spam: Pass true to report the messages as spam
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="deleteGroupCallMessagesBySender", init=False, repr=False)
-    group_call_id: "int" = 0
-    sender_id: "MessageSender | None" = None
-    report_spam: "bool" = False
-
-
-
-@dataclass
-class GetLiveStoryTopDonors(Function[LiveStoryDonors]):
-    """
-    Returns the list of top live story donors
-
-    :param group_call_id: Group call identifier of the live story
-    :return: :class:`LiveStoryDonors`
-    """
-
-    _type: "str" = field(default="getLiveStoryTopDonors", init=False, repr=False)
-    group_call_id: "int" = 0
 
 
 
@@ -36727,22 +34676,6 @@ class ToggleGroupCallIsMyVideoEnabled(Function[Ok]):
 
 
 @dataclass
-class SetGroupCallPaidMessageStarCount(Function[Ok]):
-    """
-    Changes the minimum number of Telegram Stars that must be paid by general participant for each sent message to a live story call. Requires groupCall.can_be_managed right
-
-    :param group_call_id: Group call identifier; must be an identifier of a live story call
-    :param paid_message_star_count: The new minimum number of Telegram Stars; 0-getOption("paid_group_call_message_star_count_max")
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="setGroupCallPaidMessageStarCount", init=False, repr=False)
-    group_call_id: "int" = 0
-    paid_message_star_count: "int" = 0
-
-
-
-@dataclass
 class SetGroupCallParticipantIsSpeaking(Function[MessageSender]):
     """
     Informs TDLib that speaking state of a participant of an active group call has changed. Returns identifier of the participant if it is found
@@ -36763,7 +34696,7 @@ class SetGroupCallParticipantIsSpeaking(Function[MessageSender]):
 @dataclass
 class ToggleGroupCallParticipantIsMuted(Function[Ok]):
     """
-    Toggles whether a participant of an active group call is muted, unmuted, or allowed to unmute themselves; not supported for live stories
+    Toggles whether a participant of an active group call is muted, unmuted, or allowed to unmute themselves
 
     :param group_call_id: Group call identifier
     :param participant_id: Participant identifier
@@ -36781,7 +34714,7 @@ class ToggleGroupCallParticipantIsMuted(Function[Ok]):
 @dataclass
 class SetGroupCallParticipantVolumeLevel(Function[Ok]):
     """
-    Changes volume level of a participant of an active group call; not supported for live stories. If the current user can manage the group call or is the owner of the group call, then the participant's volume level will be changed for all users with the default volume level
+    Changes volume level of a participant of an active group call. If the current user can manage the group call or is the owner of the group call, then the participant's volume level will be changed for all users with the default volume level
 
     :param group_call_id: Group call identifier
     :param participant_id: Participant identifier
@@ -36833,7 +34766,7 @@ class GetGroupCallParticipants(Function[GroupCallParticipants]):
 @dataclass
 class LoadGroupCallParticipants(Function[Ok]):
     """
-    Loads more participants of a group call; not supported in live stories. The loaded participants will be received through updates. Use the field groupCall.loaded_all_participants to check whether all participants have already been loaded
+    Loads more participants of a group call. The loaded participants will be received through updates. Use the field groupCall.loaded_all_participants to check whether all participants have already been loaded
 
     :param group_call_id: Group call identifier. The group call must be previously received through getGroupCall and must be joined or being joined
     :param limit: The maximum number of participants to load; up to 100
@@ -36863,7 +34796,7 @@ class LeaveGroupCall(Function[Ok]):
 @dataclass
 class EndGroupCall(Function[Ok]):
     """
-    Ends a group call. Requires groupCall.can_be_managed right for video chats and live stories or groupCall.is_owned otherwise
+    Ends a group call. Requires groupCall.can_be_managed right for video chats or groupCall.is_owned otherwise
 
     :param group_call_id: Group call identifier
     :return: :class:`Ok`
@@ -36875,23 +34808,23 @@ class EndGroupCall(Function[Ok]):
 
 
 @dataclass
-class GetGroupCallStreams(Function[GroupCallStreams]):
+class GetVideoChatStreams(Function[VideoChatStreams]):
     """
-    Returns information about available streams in a video chat or a live story
+    Returns information about available video chat streams
 
     :param group_call_id: Group call identifier
-    :return: :class:`GroupCallStreams`
+    :return: :class:`VideoChatStreams`
     """
 
-    _type: "str" = field(default="getGroupCallStreams", init=False, repr=False)
+    _type: "str" = field(default="getVideoChatStreams", init=False, repr=False)
     group_call_id: "int" = 0
 
 
 
 @dataclass
-class GetGroupCallStreamSegment(Function[Data]):
+class GetVideoChatStreamSegment(Function[Data]):
     """
-    Returns a file with a segment of a video chat or live story in a modified OGG format for audio or MPEG-4 format for video
+    Returns a file with a segment of a video chat stream in a modified OGG format for audio or MPEG-4 format for video
 
     :param group_call_id: Group call identifier
     :param time_offset: Point in time when the stream segment begins; Unix timestamp in milliseconds
@@ -36901,7 +34834,7 @@ class GetGroupCallStreamSegment(Function[Data]):
     :return: :class:`Data`
     """
 
-    _type: "str" = field(default="getGroupCallStreamSegment", init=False, repr=False)
+    _type: "str" = field(default="getVideoChatStreamSegment", init=False, repr=False)
     group_call_id: "int" = 0
     time_offset: "int" = 0
     scale: "int" = 0
@@ -37009,16 +34942,14 @@ class AddContact(Function[Ok]):
     """
     Adds a user to the contact list or edits an existing contact by their user identifier
 
-    :param user_id: Identifier of the user
-    :param contact: The contact to add or edit; phone number may be empty and needs to be specified only if known
+    :param contact: The contact to add or edit; phone number may be empty and needs to be specified only if known, vCard is ignored
     :param share_phone_number: Pass true to share the current user's phone number with the new contact. A corresponding rule to userPrivacySettingShowPhoneNumber will be added if needed.
      Use the field userFullInfo.need_phone_number_privacy_exception to check whether the current user needs to be asked to share their phone number
     :return: :class:`Ok`
     """
 
     _type: "str" = field(default="addContact", init=False, repr=False)
-    user_id: "int" = 0
-    contact: "ImportedContact | None" = None
+    contact: "Contact | None" = None
     share_phone_number: "bool" = False
 
 
@@ -37028,12 +34959,12 @@ class ImportContacts(Function[ImportedContacts]):
     """
     Adds new contacts or edits existing contacts by their phone numbers; contacts' user identifiers are ignored
 
-    :param contacts: The list of contacts to import or edit
+    :param contacts: The list of contacts to import or edit; contacts' vCard are ignored and are not imported
     :return: :class:`ImportedContacts`
     """
 
     _type: "str" = field(default="importContacts", init=False, repr=False)
-    contacts: "list[ImportedContact] | None" = None
+    contacts: "list[Contact] | None" = None
 
 
 
@@ -37096,12 +35027,12 @@ class ChangeImportedContacts(Function[ImportedContacts]):
     """
     Changes imported contacts using the list of contacts saved on the device. Imports newly added contacts and, if at least the file database is enabled, deletes recently deleted contacts. Query result depends on the result of the previous query, so only one query is possible at the same time
 
-    :param contacts: The new list of contacts to import
+    :param contacts: The new list of contacts, contact's vCard are ignored and are not imported
     :return: :class:`ImportedContacts`
     """
 
     _type: "str" = field(default="changeImportedContacts", init=False, repr=False)
-    contacts: "list[ImportedContact] | None" = None
+    contacts: "list[Contact] | None" = None
 
 
 
@@ -37160,22 +35091,6 @@ class SetUserPersonalProfilePhoto(Function[Ok]):
 
 
 @dataclass
-class SetUserNote(Function[Ok]):
-    """
-    Changes a note of a contact user
-
-    :param user_id: User identifier
-    :param note: Note to set for the user; 0-getOption("user_note_text_length_max") characters. Only Bold, Italic, Underline, Strikethrough, Spoiler, and CustomEmoji entities are allowed
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="setUserNote", init=False, repr=False)
-    user_id: "int" = 0
-    note: "FormattedText | None" = None
-
-
-
-@dataclass
 class SuggestUserProfilePhoto(Function[Ok]):
     """
     Suggests a profile photo to another regular user with common messages and allowing non-paid messages
@@ -37188,22 +35103,6 @@ class SuggestUserProfilePhoto(Function[Ok]):
     _type: "str" = field(default="suggestUserProfilePhoto", init=False, repr=False)
     user_id: "int" = 0
     photo: "InputChatPhoto | None" = None
-
-
-
-@dataclass
-class SuggestUserBirthdate(Function[Ok]):
-    """
-    Suggests a birthdate to another regular user with common messages and allowing non-paid messages
-
-    :param user_id: User identifier
-    :param birthdate: Birthdate to suggest
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="suggestUserBirthdate", init=False, repr=False)
-    user_id: "int" = 0
-    birthdate: "Birthdate | None" = None
 
 
 
@@ -37284,82 +35183,6 @@ class GetUserProfilePhotos(Function[ChatPhotos]):
     user_id: "int" = 0
     offset: "int" = 0
     limit: "int" = 0
-
-
-
-@dataclass
-class GetUserProfileAudios(Function[Audios]):
-    """
-    Returns the list of profile audio files of a user
-
-    :param user_id: User identifier
-    :param offset: The number of audio files to skip; must be non-negative
-    :param limit: The maximum number of audio files to be returned; up to 100
-    :return: :class:`Audios`
-    """
-
-    _type: "str" = field(default="getUserProfileAudios", init=False, repr=False)
-    user_id: "int" = 0
-    offset: "int" = 0
-    limit: "int" = 0
-
-
-
-@dataclass
-class IsProfileAudio(Function[Ok]):
-    """
-    Checks whether a file is in the profile audio files of the current user. Returns a 404 error if it isn't
-
-    :param file_id: Identifier of the audio file to check
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="isProfileAudio", init=False, repr=False)
-    file_id: "int" = 0
-
-
-
-@dataclass
-class AddProfileAudio(Function[Ok]):
-    """
-    Adds an audio file to the beginning of the profile audio files of the current user
-
-    :param file_id: Identifier of the audio file to be added. The file must have been uploaded to the server
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="addProfileAudio", init=False, repr=False)
-    file_id: "int" = 0
-
-
-
-@dataclass
-class SetProfileAudioPosition(Function[Ok]):
-    """
-    Changes position of an audio file in the profile audio files of the current user
-
-    :param file_id: Identifier of the file from profile audio files, which position will be changed
-    :param after_file_id: Identifier of the file from profile audio files after which the file will be positioned; pass 0 to move the file to the beginning of the list
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="setProfileAudioPosition", init=False, repr=False)
-    file_id: "int" = 0
-    after_file_id: "int" = 0
-
-
-
-@dataclass
-class RemoveProfileAudio(Function[Ok]):
-    """
-    Removes an audio file from the profile audio files of the current user
-
-    :param file_id: Identifier of the audio file to be removed
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="removeProfileAudio", init=False, repr=False)
-    file_id: "int" = 0
 
 
 
@@ -38072,20 +35895,6 @@ class SetAccentColor(Function[Ok]):
 
 
 @dataclass
-class SetUpgradedGiftColors(Function[Ok]):
-    """
-    Changes color scheme for the current user based on an owned or a hosted upgraded gift; for Telegram Premium users only
-
-    :param upgraded_gift_colors_id: Identifier of the upgradedGiftColors scheme to use
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="setUpgradedGiftColors", init=False, repr=False)
-    upgraded_gift_colors_id: "int" = 0
-
-
-
-@dataclass
 class SetProfileAccentColor(Function[Ok]):
     """
     Changes accent color and background custom emoji for profile of the current user; for Telegram Premium users only
@@ -38186,20 +35995,6 @@ class SetBirthdate(Function[Ok]):
 
     _type: "str" = field(default="setBirthdate", init=False, repr=False)
     birthdate: "Birthdate | None" = None
-
-
-
-@dataclass
-class SetMainProfileTab(Function[Ok]):
-    """
-    Changes the main profile tab of the current user
-
-    :param main_profile_tab: The new value of the main profile tab
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="setMainProfileTab", init=False, repr=False)
-    main_profile_tab: "ProfileTab | None" = None
 
 
 
@@ -38867,7 +36662,7 @@ class SetBotProfilePhoto(Function[Ok]):
 @dataclass
 class ToggleBotUsernameIsActive(Function[Ok]):
     """
-    Changes active state for a username of a bot. The editable username can be disabled only if there are other active usernames. May return an error with a message "USERNAMES_ACTIVE_TOO_MUCH" if the maximum number of active usernames has been reached. Can be called only if userTypeBot.can_be_edited == true
+    Changes active state for a username of a bot. The editable username can't be disabled. May return an error with a message "USERNAMES_ACTIVE_TOO_MUCH" if the maximum number of active usernames has been reached. Can be called only if userTypeBot.can_be_edited == true
 
     :param bot_user_id: Identifier of the target bot
     :param username: The username to change
@@ -39250,22 +37045,6 @@ class SetSupergroupUnrestrictBoostCount(Function[Ok]):
 
 
 @dataclass
-class SetSupergroupMainProfileTab(Function[Ok]):
-    """
-    Changes the main profile tab of the channel; requires can_change_info administrator right
-
-    :param supergroup_id: Identifier of the channel
-    :param main_profile_tab: The new value of the main profile tab
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="setSupergroupMainProfileTab", init=False, repr=False)
-    supergroup_id: "int" = 0
-    main_profile_tab: "ProfileTab | None" = None
-
-
-
-@dataclass
 class ToggleSupergroupSignMessages(Function[Ok]):
     """
     Toggles whether sender signature or link to the account is added to sent messages in a channel; requires can_change_info member right
@@ -39304,7 +37083,7 @@ class ToggleSupergroupJoinByRequest(Function[Ok]):
     """
     Toggles whether all users directly joining the supergroup need to be approved by supergroup administrators; requires can_restrict_members administrator right
 
-    :param supergroup_id: Identifier of the supergroup that isn't a broadcast group and isn't a channel direct message group
+    :param supergroup_id: Identifier of the supergroup that isn't a broadcast group
     :param join_by_request: New value of join_by_request
     :return: :class:`Ok`
     """
@@ -39666,26 +37445,12 @@ class GetAvailableGifts(Function[AvailableGifts]):
 
 
 @dataclass
-class CanSendGift(Function[CanSendGiftResult]):
-    """
-    Checks whether a gift with next_send_date in the future can be sent already
-
-    :param gift_id: Identifier of the gift to send
-    :return: :class:`CanSendGiftResult`
-    """
-
-    _type: "str" = field(default="canSendGift", init=False, repr=False)
-    gift_id: "int" = 0
-
-
-
-@dataclass
 class SendGift(Function[Ok]):
     """
     Sends a gift to another user or channel chat. May return an error with a message "STARGIFT_USAGE_LIMITED" if the gift was sold out
 
     :param gift_id: Identifier of the gift to send
-    :param owner_id: Identifier of the user or the channel chat that will receive the gift; limited gifts can't be sent to channel chats
+    :param owner_id: Identifier of the user or the channel chat that will receive the gift
     :param text: Text to show along with the gift; 0-getOption("gift_text_length_max") characters. Only Bold, Italic, Underline, Strikethrough, Spoiler, and CustomEmoji entities are allowed.
      Must be empty if the receiver enabled paid messages
     :param is_private: Pass true to show gift text and sender only to the gift receiver; otherwise, everyone will be able to see them
@@ -39699,101 +37464,6 @@ class SendGift(Function[Ok]):
     text: "FormattedText | None" = None
     is_private: "bool" = False
     pay_for_upgrade: "bool" = False
-
-
-
-@dataclass
-class GetGiftAuctionState(Function[GiftAuctionState]):
-    """
-    Returns auction state for a gift
-
-    :param auction_id: Unique identifier of the auction
-    :return: :class:`GiftAuctionState`
-    """
-
-    _type: "str" = field(default="getGiftAuctionState", init=False, repr=False)
-    auction_id: "str" = ""
-
-
-
-@dataclass
-class GetGiftAuctionAcquiredGifts(Function[GiftAuctionAcquiredGifts]):
-    """
-    Returns the gifts that were acquired by the current user on a gift auction
-
-    :param gift_id: Identifier of the auctioned gift
-    :return: :class:`GiftAuctionAcquiredGifts`
-    """
-
-    _type: "str" = field(default="getGiftAuctionAcquiredGifts", init=False, repr=False)
-    gift_id: "int" = 0
-
-
-
-@dataclass
-class OpenGiftAuction(Function[Ok]):
-    """
-    Informs TDLib that a gift auction was opened by the user
-
-    :param gift_id: Identifier of the gift, which auction was opened
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="openGiftAuction", init=False, repr=False)
-    gift_id: "int" = 0
-
-
-
-@dataclass
-class CloseGiftAuction(Function[Ok]):
-    """
-    Informs TDLib that a gift auction was closed by the user
-
-    :param gift_id: Identifier of the gift, which auction was closed
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="closeGiftAuction", init=False, repr=False)
-    gift_id: "int" = 0
-
-
-
-@dataclass
-class PlaceGiftAuctionBid(Function[Ok]):
-    """
-    Places a bid on an auction gift
-
-    :param gift_id: Identifier of the gift to place the bid on
-    :param star_count: The number of Telegram Stars to place in the bid
-    :param user_id: Identifier of the user that will receive the gift
-    :param text: Text to show along with the gift; 0-getOption("gift_text_length_max") characters. Only Bold, Italic, Underline, Strikethrough, Spoiler, and CustomEmoji entities are allowed.
-     Must be empty if the receiver enabled paid messages
-    :param is_private: Pass true to show gift text and sender only to the gift receiver; otherwise, everyone will be able to see them
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="placeGiftAuctionBid", init=False, repr=False)
-    gift_id: "int" = 0
-    star_count: "int" = 0
-    user_id: "int" = 0
-    text: "FormattedText | None" = None
-    is_private: "bool" = False
-
-
-
-@dataclass
-class IncreaseGiftAuctionBid(Function[Ok]):
-    """
-    Increases a bid for an auction gift without changing gift text and receiver
-
-    :param gift_id: Identifier of the gift to put the bid on
-    :param star_count: The number of Telegram Stars to put in the bid
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="increaseGiftAuctionBid", init=False, repr=False)
-    gift_id: "int" = 0
-    star_count: "int" = 0
 
 
 
@@ -39896,27 +37566,9 @@ class UpgradeGift(Function[UpgradeGiftResult]):
 
 
 @dataclass
-class BuyGiftUpgrade(Function[Ok]):
-    """
-    Pays for upgrade of a regular gift that is owned by another user or channel chat
-
-    :param owner_id: Identifier of the user or the channel chat that owns the gift
-    :param prepaid_upgrade_hash: Prepaid upgrade hash as received along with the gift
-    :param star_count: The amount of Telegram Stars the user agreed to pay for the upgrade; must be equal to gift.upgrade_star_count
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="buyGiftUpgrade", init=False, repr=False)
-    owner_id: "MessageSender | None" = None
-    prepaid_upgrade_hash: "str" = ""
-    star_count: "int" = 0
-
-
-
-@dataclass
 class TransferGift(Function[Ok]):
     """
-    Sends an upgraded gift to another user or channel chat
+    Sends an upgraded gift to another user or a channel chat
 
     :param business_connection_id: Unique identifier of business connection on behalf of which to send the request; for bots only
     :param received_gift_id: Identifier of the gift
@@ -39934,36 +37586,20 @@ class TransferGift(Function[Ok]):
 
 
 @dataclass
-class DropGiftOriginalDetails(Function[Ok]):
-    """
-    Drops original details for an upgraded gift
-
-    :param received_gift_id: Identifier of the gift
-    :param star_count: The amount of Telegram Stars required to pay for the operation
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="dropGiftOriginalDetails", init=False, repr=False)
-    received_gift_id: "str" = ""
-    star_count: "int" = 0
-
-
-
-@dataclass
-class SendResoldGift(Function[GiftResaleResult]):
+class SendResoldGift(Function[Ok]):
     """
     Sends an upgraded gift that is available for resale to another user or channel chat; gifts already owned by the current user must be transferred using transferGift and can't be passed to the method
 
     :param gift_name: Name of the upgraded gift to send
     :param owner_id: Identifier of the user or the channel chat that will receive the gift
-    :param price: The price that the user agreed to pay for the gift
-    :return: :class:`GiftResaleResult`
+    :param star_count: The amount of Telegram Stars required to pay for the gift
+    :return: :class:`Ok`
     """
 
     _type: "str" = field(default="sendResoldGift", init=False, repr=False)
     gift_name: "str" = ""
     owner_id: "MessageSender | None" = None
-    price: "GiftResalePrice | None" = None
+    star_count: "int" = 0
 
 
 
@@ -39974,15 +37610,11 @@ class GetReceivedGifts(Function[ReceivedGifts]):
 
     :param business_connection_id: Unique identifier of business connection on behalf of which to send the request; for bots only
     :param owner_id: Identifier of the gift receiver
-    :param collection_id: Pass collection identifier to get gifts only from the specified collection; pass 0 to get gifts regardless of collections
     :param exclude_unsaved: Pass true to exclude gifts that aren't saved to the chat's profile page. Always true for gifts received by other users and channel chats without can_post_messages administrator right
     :param exclude_saved: Pass true to exclude gifts that are saved to the chat's profile page. Always false for gifts received by other users and channel chats without can_post_messages administrator right
     :param exclude_unlimited: Pass true to exclude gifts that can be purchased unlimited number of times
-    :param exclude_upgradable: Pass true to exclude gifts that can be purchased limited number of times and can be upgraded
-    :param exclude_non_upgradable: Pass true to exclude gifts that can be purchased limited number of times and can't be upgraded
+    :param exclude_limited: Pass true to exclude gifts that can be purchased limited number of times
     :param exclude_upgraded: Pass true to exclude upgraded gifts
-    :param exclude_without_colors: Pass true to exclude gifts that can't be used in setUpgradedGiftColors
-    :param exclude_hosted: Pass true to exclude gifts that are just hosted and are not owned by the owner
     :param sort_by_price: Pass true to sort results by gift price instead of send date
     :param offset: Offset of the first entry to return as received from the previous request; use empty string to get the first chunk of results
     :param limit: The maximum number of gifts to be returned; must be positive and can't be greater than 100. For optimal performance, the number of returned objects is chosen by TDLib and can be smaller than the specified limit
@@ -39992,15 +37624,11 @@ class GetReceivedGifts(Function[ReceivedGifts]):
     _type: "str" = field(default="getReceivedGifts", init=False, repr=False)
     business_connection_id: "str" = ""
     owner_id: "MessageSender | None" = None
-    collection_id: "int" = 0
     exclude_unsaved: "bool" = False
     exclude_saved: "bool" = False
     exclude_unlimited: "bool" = False
-    exclude_upgradable: "bool" = False
-    exclude_non_upgradable: "bool" = False
+    exclude_limited: "bool" = False
     exclude_upgraded: "bool" = False
-    exclude_without_colors: "bool" = False
-    exclude_hosted: "bool" = False
     sort_by_price: "bool" = False
     offset: "str" = ""
     limit: "int" = 0
@@ -40036,20 +37664,6 @@ class GetUpgradedGift(Function[UpgradedGift]):
 
 
 @dataclass
-class GetUpgradedGiftValueInfo(Function[UpgradedGiftValueInfo]):
-    """
-    Returns information about value of an upgraded gift by its name
-
-    :param name: Unique name of the upgraded gift
-    :return: :class:`UpgradedGiftValueInfo`
-    """
-
-    _type: "str" = field(default="getUpgradedGiftValueInfo", init=False, repr=False)
-    name: "str" = ""
-
-
-
-@dataclass
 class GetUpgradedGiftWithdrawalUrl(Function[HttpUrl]):
     """
     Returns a URL for upgraded gift withdrawal in the TON blockchain as an NFT; requires owner privileges for gifts owned by a chat
@@ -40071,15 +37685,14 @@ class SetGiftResalePrice(Function[Ok]):
     Changes resale price of a unique gift owned by the current user
 
     :param received_gift_id: Identifier of the unique gift
-    :param price: The new price for the unique gift; pass null to disallow gift resale. The current user will receive
-     getOption("gift_resale_star_earnings_per_mille") Telegram Stars for each 1000 Telegram Stars paid for the gift if the gift price is in Telegram Stars or
-     getOption("gift_resale_ton_earnings_per_mille") Toncoins for each 1000 Toncoins paid for the gift if the gift price is in Toncoins
+    :param resale_star_count: The new price for the unique gift; 0 or getOption("gift_resale_star_count_min")-getOption("gift_resale_star_count_max"). Pass 0 to disallow gift resale.
+     The current user will receive getOption("gift_resale_earnings_per_mille") Telegram Stars for each 1000 Telegram Stars paid for the gift
     :return: :class:`Ok`
     """
 
     _type: "str" = field(default="setGiftResalePrice", init=False, repr=False)
     received_gift_id: "str" = ""
-    price: "GiftResalePrice | None" = None
+    resale_star_count: "int" = 0
 
 
 
@@ -40103,143 +37716,6 @@ class SearchGiftsForResale(Function[GiftsForResale]):
     attributes: "list[UpgradedGiftAttributeId] | None" = None
     offset: "str" = ""
     limit: "int" = 0
-
-
-
-@dataclass
-class GetGiftCollections(Function[GiftCollections]):
-    """
-    Returns collections of gifts owned by the given user or chat
-
-    :param owner_id: Identifier of the user or the channel chat that received the gifts
-    :return: :class:`GiftCollections`
-    """
-
-    _type: "str" = field(default="getGiftCollections", init=False, repr=False)
-    owner_id: "MessageSender | None" = None
-
-
-
-@dataclass
-class CreateGiftCollection(Function[GiftCollection]):
-    """
-    Creates a collection from gifts on the current user's or a channel's profile page; requires can_post_messages administrator right in the channel chat. An owner can have up to getOption("gift_collection_count_max") gift collections. The new collection will be added to the end of the gift collection list of the owner. Returns the created collection
-
-    :param owner_id: Identifier of the user or the channel chat that received the gifts
-    :param name: Name of the collection; 1-12 characters
-    :param received_gift_ids: Identifier of the gifts to add to the collection; 0-getOption("gift_collection_size_max") identifiers
-    :return: :class:`GiftCollection`
-    """
-
-    _type: "str" = field(default="createGiftCollection", init=False, repr=False)
-    owner_id: "MessageSender | None" = None
-    name: "str" = ""
-    received_gift_ids: "list[str] | None" = None
-
-
-
-@dataclass
-class ReorderGiftCollections(Function[Ok]):
-    """
-    Changes order of gift collections. If the collections are owned by a channel chat, then requires can_post_messages administrator right in the channel chat
-
-    :param owner_id: Identifier of the user or the channel chat that owns the collection
-    :param collection_ids: New order of gift collections
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="reorderGiftCollections", init=False, repr=False)
-    owner_id: "MessageSender | None" = None
-    collection_ids: "list[int] | None" = None
-
-
-
-@dataclass
-class DeleteGiftCollection(Function[Ok]):
-    """
-    Deletes a gift collection. If the collection is owned by a channel chat, then requires can_post_messages administrator right in the channel chat
-
-    :param owner_id: Identifier of the user or the channel chat that owns the collection
-    :param collection_id: Identifier of the gift collection
-    :return: :class:`Ok`
-    """
-
-    _type: "str" = field(default="deleteGiftCollection", init=False, repr=False)
-    owner_id: "MessageSender | None" = None
-    collection_id: "int" = 0
-
-
-
-@dataclass
-class SetGiftCollectionName(Function[GiftCollection]):
-    """
-    Changes name of a gift collection. If the collection is owned by a channel chat, then requires can_post_messages administrator right in the channel chat. Returns the changed collection
-
-    :param owner_id: Identifier of the user or the channel chat that owns the collection
-    :param collection_id: Identifier of the gift collection
-    :param name: New name of the collection; 1-12 characters
-    :return: :class:`GiftCollection`
-    """
-
-    _type: "str" = field(default="setGiftCollectionName", init=False, repr=False)
-    owner_id: "MessageSender | None" = None
-    collection_id: "int" = 0
-    name: "str" = ""
-
-
-
-@dataclass
-class AddGiftCollectionGifts(Function[GiftCollection]):
-    """
-    Adds gifts to the beginning of a previously created collection. If the collection is owned by a channel chat, then requires can_post_messages administrator right in the channel chat. Returns the changed collection
-
-    :param owner_id: Identifier of the user or the channel chat that owns the collection
-    :param collection_id: Identifier of the gift collection
-    :param received_gift_ids: Identifier of the gifts to add to the collection; 1-getOption("gift_collection_size_max") identifiers.
-     If after addition the collection has more than getOption("gift_collection_size_max") gifts, then the last one are removed from the collection
-    :return: :class:`GiftCollection`
-    """
-
-    _type: "str" = field(default="addGiftCollectionGifts", init=False, repr=False)
-    owner_id: "MessageSender | None" = None
-    collection_id: "int" = 0
-    received_gift_ids: "list[str] | None" = None
-
-
-
-@dataclass
-class RemoveGiftCollectionGifts(Function[GiftCollection]):
-    """
-    Removes gifts from a collection. If the collection is owned by a channel chat, then requires can_post_messages administrator right in the channel chat. Returns the changed collection
-
-    :param owner_id: Identifier of the user or the channel chat that owns the collection
-    :param collection_id: Identifier of the gift collection
-    :param received_gift_ids: Identifier of the gifts to remove from the collection
-    :return: :class:`GiftCollection`
-    """
-
-    _type: "str" = field(default="removeGiftCollectionGifts", init=False, repr=False)
-    owner_id: "MessageSender | None" = None
-    collection_id: "int" = 0
-    received_gift_ids: "list[str] | None" = None
-
-
-
-@dataclass
-class ReorderGiftCollectionGifts(Function[GiftCollection]):
-    """
-    Changes order of gifts in a collection. If the collection is owned by a channel chat, then requires can_post_messages administrator right in the channel chat. Returns the changed collection
-
-    :param owner_id: Identifier of the user or the channel chat that owns the collection
-    :param collection_id: Identifier of the gift collection
-    :param received_gift_ids: Identifier of the gifts to move to the beginning of the collection. All other gifts are placed in the current order after the specified gifts
-    :return: :class:`GiftCollection`
-    """
-
-    _type: "str" = field(default="reorderGiftCollectionGifts", init=False, repr=False)
-    owner_id: "MessageSender | None" = None
-    collection_id: "int" = 0
-    received_gift_ids: "list[str] | None" = None
 
 
 
@@ -41007,34 +38483,6 @@ class GetStarAdAccountUrl(Function[HttpUrl]):
 
     _type: "str" = field(default="getStarAdAccountUrl", init=False, repr=False)
     owner_id: "MessageSender | None" = None
-
-
-
-@dataclass
-class GetTonRevenueStatistics(Function[TonRevenueStatistics]):
-    """
-    Returns detailed Toncoin revenue statistics of the current user
-
-    :param is_dark: Pass true if a dark theme is used by the application
-    :return: :class:`TonRevenueStatistics`
-    """
-
-    _type: "str" = field(default="getTonRevenueStatistics", init=False, repr=False)
-    is_dark: "bool" = False
-
-
-
-@dataclass
-class GetTonWithdrawalUrl(Function[HttpUrl]):
-    """
-    Returns a URL for Toncoin withdrawal from the current user's account. The user must have at least 10 toncoins to withdraw and can withdraw up to 100000 Toncoins in one transaction
-
-    :param password: The 2-step verification password of the current user
-    :return: :class:`HttpUrl`
-    """
-
-    _type: "str" = field(default="getTonWithdrawalUrl", init=False, repr=False)
-    password: "str" = ""
 
 
 
