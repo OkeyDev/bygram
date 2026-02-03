@@ -14,4 +14,9 @@ requires = ["uv_build>=0.9.22,<0.10.0"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
-module-name = "bygram"
+module-name = ["bygram", "bygram-stubs"]
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.408",
+]

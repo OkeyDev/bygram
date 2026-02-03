@@ -1,0 +1,13 @@
+from dataclasses import dataclass
+from typing import Generic, TypeVar
+
+T = TypeVar('T')
+
+@dataclass
+class TlObject: ...
+@dataclass
+class ObjectBase(TlObject): ...
+@dataclass
+class Update(ObjectBase): ...
+@dataclass
+class Function(ObjectBase, Generic[T]): ...
